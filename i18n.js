@@ -519,6 +519,15 @@
     }
   };
 
+  const canonicalText = new Map();
+  const normalize = value => String(value || '').replace(/\s+/g, ' ').trim();
+  Object.entries(dictionary).forEach(([, entries]) => {
+    Object.entries(entries).forEach(([english, translated]) => {
+      canonicalText.set(normalize(english), english);
+      canonicalText.set(normalize(translated), english);
+    });
+  });
+
   function currentLanguage() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (SUPPORTED.includes(saved)) return saved;
@@ -527,15 +536,16 @@
   }
 
   function translateText(value, lang = currentLanguage()) {
-    if (lang === 'en') return value;
-    return dictionary[lang]?.[value] || value;
+    const key = canonicalText.get(normalize(value)) || value;
+    if (lang === 'en') return key;
+    return dictionary[lang]?.[key] || key;
   }
 
   function translateNode(node, lang) {
     if (node.nodeType === Node.ELEMENT_NODE && node.closest?.('[data-no-i18n]')) return;
     if (node.nodeType === Node.TEXT_NODE && node.parentElement?.closest?.('[data-no-i18n]')) return;
     if (node.nodeType === Node.TEXT_NODE) {
-      const original = node.__i18nOriginal || node.textContent;
+      const original = canonicalText.get(normalize(node.__i18nOriginal)) || canonicalText.get(normalize(node.textContent)) || node.__i18nOriginal || node.textContent;
       const trimmed = original.trim();
       if (!trimmed) return;
       node.__i18nOriginal = original;
@@ -549,10 +559,18 @@
     ['placeholder', 'aria-label', 'alt', 'title'].forEach(attr => {
       if (!node.hasAttribute(attr)) return;
       const key = `i18nOriginal${attr}`;
-      const original = node.dataset[key] || node.getAttribute(attr);
+      const original = canonicalText.get(normalize(node.dataset[key])) || canonicalText.get(normalize(node.getAttribute(attr))) || node.dataset[key] || node.getAttribute(attr);
       node.dataset[key] = original;
       const next = translateText(original, lang);
       if (node.getAttribute(attr) !== next) node.setAttribute(attr, next);
+    });
+  }
+
+  function walkLanguageNodes(root, lang) {
+    translateNode(root, lang);
+    root.querySelectorAll?.('*').forEach(element => {
+      translateNode(element, lang);
+      element.childNodes.forEach(child => translateNode(child, lang));
     });
   }
 
@@ -563,18 +581,14 @@
       select.value = lang;
     });
 
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
-    let node = walker.currentNode;
-    while (node) {
-      translateNode(node, lang);
-      node = walker.nextNode();
-    }
+    walkLanguageNodes(document.body, lang);
   }
 
   function setLanguage(lang) {
     if (!SUPPORTED.includes(lang)) return;
     localStorage.setItem(STORAGE_KEY, lang);
     applyLanguage(lang);
+    requestAnimationFrame(() => applyLanguage(lang));
     window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
   }
 
