@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kinetiq-shell-v20260709-1';
+const CACHE_NAME = 'kinetiq-shell-v20260709-2';
 const APP_SHELL = [
   './',
   './index.html',

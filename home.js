@@ -8,6 +8,25 @@ function isToday(value) { const date = new Date(value); return Number.isFinite(d
 function readLocal(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
 function writeLocal(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); window.dispatchEvent(new CustomEvent('localDataChanged',{detail:{key,value}})); } catch {} }
 function homeToast(message) { const el = document.getElementById('toast'); el.textContent = message; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1800); }
+function homeT(text) { return window.KinetiqI18n?.t(text) || text; }
+function currentGreetingKey(date = new Date()) {
+  const hour = date.getHours();
+  if (hour < 5) return 'Good night,';
+  if (hour < 12) return 'Good morning,';
+  if (hour < 18) return 'Good afternoon,';
+  if (hour < 22) return 'Good evening,';
+  return 'Good night,';
+}
+function renderHomeHero(profile = readLocal('form-profile', null)) {
+  const lang = window.KinetiqI18n?.currentLanguage?.() || document.documentElement.lang || 'en';
+  const now = new Date();
+  const dateLabel = new Intl.DateTimeFormat(lang, { weekday: 'long', month: 'short', day: '2-digit' }).format(now);
+  const dateEl = document.querySelector('.hero-copy .eyebrow');
+  const titleEl = document.querySelector('.hero-copy h1');
+  if (dateEl) { dateEl.dataset.noI18n = 'true'; dateEl.textContent = dateLabel.replace(',', ' ·').toLocaleUpperCase(lang); }
+  const name = profile?.name?.trim()?.split(/\s+/)[0] || homeT('User');
+  if (titleEl) { titleEl.dataset.noI18n = 'true'; titleEl.innerHTML = `${homeT(currentGreetingKey(now))}<br><em>${name}.</em>`; }
+}
 
 let dailyGoals = readLocal('form-daily-goals', defaultGoals);
 let homeAccountMode = 'login';
@@ -51,7 +70,7 @@ function renderProfile(profile) {
       avatar.textContent = 'SK';
       avatar.classList.remove('logged-in');
     });
-    document.querySelector('.hero-copy h1').innerHTML = 'Good morning,<br><em>Senan.</em>';
+    renderHomeHero(null);
     renderHomeAccount(null);
     return;
   }
@@ -60,7 +79,7 @@ function renderProfile(profile) {
     avatar.textContent = initials;
     avatar.classList.add('logged-in');
   });
-  document.querySelector('.hero-copy h1').innerHTML = `Good morning,<br><em>${profile.name.split(' ')[0]}.</em>`;
+  renderHomeHero(profile);
   renderHomeAccount(profile);
 }
 function getInitials(name = '') {
@@ -98,6 +117,11 @@ function renderHomeAccount(profile = readLocal('form-profile', null)) {
   document.getElementById('home-profile-sync').textContent = accountSyncLabel();
 }
 renderProfile(readLocal('form-profile', null));
+setInterval(() => renderHomeHero(readLocal('form-profile', null)), 60000);
+window.addEventListener('languageChanged', () => {
+  renderHomeHero(readLocal('form-profile', null));
+  renderHomeAccount(readLocal('form-profile', null));
+});
 document.getElementById('login-form').addEventListener('submit', event => {
   event.preventDefault();
   const profile = { name: document.getElementById('login-name').value.trim(), email: document.getElementById('login-email').value.trim() };

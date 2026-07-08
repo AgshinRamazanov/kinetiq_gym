@@ -11,6 +11,10 @@
       'Food preview': 'Фото еды',
       'SATURDAY · JUL 04': 'СУББОТА · 4 ИЮЛ',
       'Good morning,': 'Доброе утро,',
+      'Good afternoon,': 'Добрый день,',
+      'Good evening,': 'Добрый вечер,',
+      'Good night,': 'Доброй ночи,',
+      'User': 'Пользователь',
       'Your body has a plan. Let’s meet it halfway.': 'У тела есть план. Давайте поможем ему.',
       'Snap your meal': 'Сфотографируйте еду',
       'Calories & macros in seconds': 'Калории и макросы за секунды',
@@ -203,6 +207,7 @@
       '9 completed': '9 завершено',
       'Go to login': 'Перейти ко входу',
       'Do later': 'Позже',
+      'Language': 'Язык',
       '01 · YOUR DIRECTION': '01 · ВАШЕ НАПРАВЛЕНИЕ',
       'What are we': 'Что мы',
       'building toward?': 'строим?',
@@ -263,6 +268,10 @@
       'Food preview': 'Yemek önizlemesi',
       'SATURDAY · JUL 04': 'CUMARTESİ · 4 TEM',
       'Good morning,': 'Günaydın,',
+      'Good afternoon,': 'İyi günler,',
+      'Good evening,': 'İyi akşamlar,',
+      'Good night,': 'İyi geceler,',
+      'User': 'Kullanıcı',
       'Your body has a plan. Let’s meet it halfway.': 'Vücudunun bir planı var. Ona destek olalım.',
       'Snap your meal': 'Yemeğini çek',
       'Calories & macros in seconds': 'Kalori ve makrolar saniyeler içinde',
@@ -455,6 +464,7 @@
       '9 completed': '9 tamamlandı',
       'Go to login': 'Girişe git',
       'Do later': 'Sonra',
+      'Language': 'Dil',
       '01 · YOUR DIRECTION': '01 · YÖNÜN',
       'What are we': 'Neye doğru',
       'building toward?': 'ilerliyoruz?',
@@ -522,6 +532,8 @@
   }
 
   function translateNode(node, lang) {
+    if (node.nodeType === Node.ELEMENT_NODE && node.closest?.('[data-no-i18n]')) return;
+    if (node.nodeType === Node.TEXT_NODE && node.parentElement?.closest?.('[data-no-i18n]')) return;
     if (node.nodeType === Node.TEXT_NODE) {
       const original = node.__i18nOriginal || node.textContent;
       const trimmed = original.trim();
@@ -569,20 +581,32 @@
   function bindControls() {
     document.querySelectorAll('[data-language-select]').forEach(select => {
       select.value = currentLanguage();
+      if (select.dataset.languageBound) return;
+      select.dataset.languageBound = 'true';
       select.addEventListener('change', event => setLanguage(event.target.value));
     });
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function init() {
     bindControls();
     applyLanguage();
+    document.addEventListener('change', event => {
+      const select = event.target.closest?.('[data-language-select]');
+      if (select) setLanguage(select.value);
+    });
     const observer = new MutationObserver(records => {
       if (records.some(record => record.type === 'childList' || record.type === 'characterData')) {
-        requestAnimationFrame(() => applyLanguage());
+        requestAnimationFrame(() => {
+          bindControls();
+          applyLanguage();
+        });
       }
     });
     observer.observe(document.body, { childList: true, characterData: true, subtree: true });
-  });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 
   window.KinetiqI18n = { applyLanguage, currentLanguage, setLanguage, t: translateText };
 })();
