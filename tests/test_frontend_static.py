@@ -50,8 +50,8 @@ class FrontendStaticTests(unittest.TestCase):
         parser = AssetParser()
         parser.feed((ROOT / "index.html").read_text(encoding="utf-8"))
         self.assertEqual("manifest.webmanifest", parser.manifest)
-        self.assertIn("pwa.js?v=20260708-1", parser.assets)
-        self.assertIn("i18n.js?v=20260709-3", parser.assets)
+        self.assertIn("pwa.js?v=20260709-5", parser.assets)
+        self.assertIn("i18n.js?v=20260709-5", parser.assets)
 
         manifest = json.loads((ROOT / "manifest.webmanifest").read_text(encoding="utf-8"))
         self.assertEqual("KINETIQ", manifest["short_name"])
@@ -71,7 +71,7 @@ class FrontendStaticTests(unittest.TestCase):
     def test_language_selector_and_dictionaries_exist(self):
         index = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn("data-language-select", index)
-        self.assertLess(index.index("i18n.js?v=20260709-3"), index.index("app.js"))
+        self.assertLess(index.index("i18n.js?v=20260709-5"), index.index("app.js"))
 
         i18n = (ROOT / "i18n.js").read_text(encoding="utf-8")
         self.assertIn("ru:", i18n)

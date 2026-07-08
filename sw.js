@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kinetiq-shell-v20260709-3';
+const CACHE_NAME = 'kinetiq-shell-v20260709-5';
 const APP_SHELL = [
   './',
   './index.html',
@@ -81,8 +81,23 @@ self.addEventListener('fetch', event => {
 
   if (url.origin !== location.origin) return;
 
+  if (/\.(js|css)$/.test(url.pathname)) {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
   event.respondWith(
-    caches.match(request, { ignoreSearch: true }).then(cached => {
+    caches.match(request).then(cached => {
       const fresh = fetch(request).then(response => {
         if (response.ok) {
           const copy = response.clone();

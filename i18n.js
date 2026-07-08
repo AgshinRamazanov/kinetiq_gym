@@ -558,9 +558,9 @@
 
     ['placeholder', 'aria-label', 'alt', 'title'].forEach(attr => {
       if (!node.hasAttribute(attr)) return;
-      const key = `i18nOriginal${attr}`;
-      const original = canonicalText.get(normalize(node.dataset[key])) || canonicalText.get(normalize(node.getAttribute(attr))) || node.dataset[key] || node.getAttribute(attr);
-      node.dataset[key] = original;
+      const key = `data-i18n-original-${attr}`;
+      const original = canonicalText.get(normalize(node.getAttribute(key))) || canonicalText.get(normalize(node.getAttribute(attr))) || node.getAttribute(key) || node.getAttribute(attr);
+      node.setAttribute(key, original);
       const next = translateText(original, lang);
       if (node.getAttribute(attr) !== next) node.setAttribute(attr, next);
     });
