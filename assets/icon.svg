@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="KINETIQ app icon">
+  <rect width="512" height="512" rx="112" fill="#f4f0e8"/>
+  <rect x="96" y="95" width="320" height="320" rx="84" fill="#171714"/>
+  <path d="M170 338V174h58v67l57-67h67l-70 79 76 85h-72l-58-68v68h-58Z" fill="#ef5b42"/>
+  <path d="M228 241h123v58H228z" fill="#c8f069" opacity=".95"/>
+</svg>

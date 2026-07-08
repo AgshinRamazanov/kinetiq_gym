@@ -2,3 +2,5 @@
 __pycache__/
 *.pyc
 supabase-config.js
+.git-publish/
+api/__pycache__/
