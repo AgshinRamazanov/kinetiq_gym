@@ -10,6 +10,13 @@ function writeLocal(key, value) { try { localStorage.setItem(key, JSON.stringify
 function homeToast(message) { const el = document.getElementById('toast'); el.textContent = message; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1800); }
 
 let dailyGoals = readLocal('form-daily-goals', defaultGoals);
+let homeAccountMode = 'login';
+function setAccountMode(mode = 'login') {
+  homeAccountMode = mode === 'signup' ? 'signup' : 'login';
+  renderHomeAccount(readLocal('form-profile', null));
+}
+window.setAccountMode = setAccountMode;
+window.getAccountMode = () => homeAccountMode;
 const goalFields = { calories: document.getElementById('goal-calories'), protein: document.getElementById('goal-protein'), carbs: document.getElementById('goal-carbs'), fat: document.getElementById('goal-fat'), water: document.getElementById('goal-water') };
 function renderGoals() {
   Object.entries(dailyGoals).forEach(([key, value]) => {
@@ -69,12 +76,16 @@ function renderHomeAccount(profile = readLocal('form-profile', null)) {
   const panel = document.getElementById('login-success');
   if (!title || !subtitle || !form || !panel) return;
   if (!profile) {
-    title.innerHTML = 'Welcome<br><em>back.</em>';
-    subtitle.textContent = 'Log in to keep your goals and progress synced.';
+    const creating = homeAccountMode === 'signup';
+    title.innerHTML = creating ? 'Create<br><em>account.</em>' : 'Welcome<br><em>back.</em>';
+    subtitle.textContent = creating ? 'Save your setup and keep progress synced.' : 'Log in to keep your goals and progress synced.';
+    form.querySelector('button[type="submit"]').textContent = creating ? 'Create account' : 'Log in';
+    form.querySelector('[data-action="create-account"]').textContent = creating ? 'Already have an account? Log in' : 'Create an account';
     form.style.display = 'grid';
     panel.classList.remove('show');
     return;
   }
+  homeAccountMode = 'login';
   title.innerHTML = 'Your<br><em>profile.</em>';
   subtitle.textContent = 'Manage your account, goals, and setup from here.';
   form.style.display = 'none';
@@ -96,7 +107,9 @@ document.getElementById('login-form').addEventListener('submit', event => {
 document.querySelectorAll('[data-open="login"]').forEach(button => button.addEventListener('click', () => {
   renderHomeAccount(readLocal('form-profile', null));
 }));
-document.querySelector('[data-action="create-account"]').addEventListener('click', () => homeToast('Account creation will be the next step.'));
+document.querySelector('[data-action="create-account"]').addEventListener('click', () => {
+  setAccountMode(homeAccountMode === 'signup' ? 'login' : 'signup');
+});
 document.getElementById('home-edit-goals')?.addEventListener('click', () => {
   document.getElementById('login').classList.remove('open');
   document.querySelector('[data-open="goals"]').click();

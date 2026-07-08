@@ -8,9 +8,14 @@ function openOnboarding(editing = false) {
   if (saved) {
     document.getElementById('setup-name').value = saved.name || profile?.name || '';
     ['goal','level','place'].forEach(key => { const input = document.querySelector(`input[name="setup-${key}"][value="${saved[key]}"]`); if(input) input.checked = true; });
-    ['sex','age','height','weight','days','duration','diet','allergies','injuries'].forEach(key => { const input = document.getElementById(`setup-${key}`); if(input && saved[key] != null) input.value = saved[key]; });
+    ['language','sex','age','height','weight','days','duration','diet','allergies','injuries'].forEach(key => { const input = document.getElementById(`setup-${key}`); if(input && saved[key] != null) input.value = saved[key]; });
     document.querySelectorAll('input[name="setup-equipment"]').forEach(input => input.checked = saved.equipment?.includes(input.value));
-  } else if (profile?.name) document.getElementById('setup-name').value = profile.name;
+  } else {
+    if (profile?.name) document.getElementById('setup-name').value = profile.name;
+    if (window.KinetiqI18n) document.getElementById('setup-language').value = window.KinetiqI18n.currentLanguage();
+  }
+  const language = document.getElementById('setup-language');
+  if (language && !language.value && window.KinetiqI18n) language.value = window.KinetiqI18n.currentLanguage();
   onboardingStep = editing ? 0 : onboardingStep;
   showOnboardingStep();
   onboardingSheet.classList.add('open'); onboardingSheet.setAttribute('aria-hidden','false');
@@ -51,21 +56,35 @@ function renderSetupPreview() {
 function finishOnboarding() {
   const existingProfile = readLocal('form-profile', {}), name = document.getElementById('setup-name').value.trim();
   const setup = {
-    name, goal:setupRadio('setup-goal'), sex:document.getElementById('setup-sex').value,
+    name, language:document.getElementById('setup-language').value, goal:setupRadio('setup-goal'), sex:document.getElementById('setup-sex').value,
     age:+document.getElementById('setup-age').value, height:+document.getElementById('setup-height').value,
     weight:+document.getElementById('setup-weight').value, level:setupRadio('setup-level'), place:setupRadio('setup-place'),
     days:+document.getElementById('setup-days').value, duration:+document.getElementById('setup-duration').value,
     equipment:[...document.querySelectorAll('input[name="setup-equipment"]:checked')].map(input => input.value),
     diet:document.getElementById('setup-diet').value, allergies:document.getElementById('setup-allergies').value.trim(), injuries:document.getElementById('setup-injuries').value.trim()
   };
-  writeLocal('form-onboarding',setup); writeLocal('form-profile',{...existingProfile,name}); writeLocal('form-training-goal',setup.goal);
+  if (window.KinetiqI18n) window.KinetiqI18n.setLanguage(setup.language);
+  writeLocal('form-onboarding',setup); writeLocal('form-training-goal',setup.goal);
   const goals = suggestedTargets(); writeLocal('form-daily-goals',goals);
-  dailyGoals = goals; renderGoals(); renderProfile({...existingProfile,name}); setGoal(setup.goal);
+  dailyGoals = goals; renderGoals(); renderProfile(readLocal('form-profile', null)); setGoal(setup.goal);
   const placeButton = document.querySelector(`.location-choice [data-value="${setup.place}"]`); if(placeButton) placeButton.click();
   document.getElementById('sex').value = setup.sex; document.getElementById('body-age').value = setup.age;
   document.getElementById('height').value = setup.height; document.getElementById('body-weight').value = setup.weight;
   window.dispatchEvent(new CustomEvent('goalsUpdated',{detail:goals}));
-  closeOnboarding(); homeToast('Your personal starting plan is ready.');
+  closeOnboarding(); openAccountSignup(name); homeToast('Create your account to save this setup.');
+}
+
+function openAccountSignup(name = '') {
+  const login = document.getElementById('login');
+  document.getElementById('login-name').value = name || readLocal('form-onboarding', {})?.name || '';
+  if (typeof setAccountMode === 'function') setAccountMode('signup');
+  else {
+    document.getElementById('account-title').innerHTML = 'Create<br><em>account.</em>';
+    document.getElementById('account-subtitle').textContent = 'Save your setup and progress.';
+    document.querySelector('#login-form button[type="submit"]').textContent = 'Create account';
+  }
+  renderHomeAccount(readLocal('form-profile', null));
+  login.classList.add('open'); login.setAttribute('aria-hidden','false');
 }
 
 document.getElementById('onboard-next').addEventListener('click', () => {
@@ -76,8 +95,16 @@ document.getElementById('onboard-next').addEventListener('click', () => {
 document.getElementById('onboard-back').addEventListener('click', () => { if(onboardingStep){onboardingStep -= 1;showOnboardingStep();} });
 document.getElementById('onboard-skip').addEventListener('click', closeOnboarding);
 document.getElementById('edit-setup').addEventListener('click', () => { document.getElementById('train-profile').classList.remove('open'); openOnboarding(true); });
+document.querySelectorAll('.profile-trigger').forEach(button => button.addEventListener('click', event => {
+  if (readLocal('form-profile', null)) return;
+  event.preventDefault(); event.stopImmediatePropagation();
+  document.getElementById('login').classList.remove('open');
+  if (!readLocal('form-onboarding', null)) openOnboarding(false);
+  else openAccountSignup();
+}, true));
 ['setup-goal','setup-sex'].forEach(name => document.querySelectorAll(`[name="${name}"]`).forEach(input => input.addEventListener('change',renderSetupPreview)));
 document.getElementById('setup-sex').addEventListener('change',renderSetupPreview);
+document.getElementById('setup-language').addEventListener('change', event => window.KinetiqI18n?.setLanguage(event.target.value));
 ['setup-age','setup-height','setup-weight','setup-days'].forEach(id => document.getElementById(id).addEventListener('input',renderSetupPreview));
 
 if (!readLocal('form-onboarding',null)) setTimeout(() => openOnboarding(false),350);

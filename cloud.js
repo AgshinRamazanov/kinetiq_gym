@@ -3,7 +3,14 @@ const loginForm=document.getElementById('login-form');
 const loginButton=loginForm.querySelector('button[type="submit"]');
 const createButton=loginForm.querySelector('[data-action="create-account"]');
 const status=document.createElement('p');status.className='cloud-status';loginForm.appendChild(status);
-let accountMode='login',supabase=null,currentUser=null,syncTimer=null,hydrating=false;
+let accountMode=window.getAccountMode?.()||'login',supabase=null,currentUser=null,syncTimer=null,hydrating=false;
+function setCloudAccountMode(mode='login'){
+  accountMode=mode==='signup'?'signup':'login';
+  loginButton.textContent=accountMode==='signup'?'Create account':'Log in';
+  createButton.textContent=accountMode==='signup'?'Already have an account? Log in':'Create an account';
+  setStatus(accountMode==='signup'?'Create a secure account to synchronize your data.':'Welcome back.');
+  if(window.setAccountMode)window.setAccountMode(accountMode);
+}
 async function signOutEverywhere(){
   if(supabase&&currentUser)await supabase.auth.signOut();
   currentUser=null;sessionStorage.removeItem('form-cloud-hydrated');localStorage.removeItem('form-profile');
@@ -35,10 +42,7 @@ if(!configured()){
 
 createButton.addEventListener('click',event=>{
   if(!configured())return;
-  event.stopImmediatePropagation();accountMode=accountMode==='login'?'signup':'login';
-  loginButton.textContent=accountMode==='signup'?'Create account':'Log in';
-  createButton.textContent=accountMode==='signup'?'Already have an account? Log in':'Create an account';
-  setStatus(accountMode==='signup'?'Create a secure account to synchronize your data.':'Welcome back.');
+  event.stopImmediatePropagation();setCloudAccountMode(accountMode==='login'?'signup':'login');
 },true);
 
 loginForm.addEventListener('submit',async event=>{
