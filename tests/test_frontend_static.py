@@ -51,6 +51,7 @@ class FrontendStaticTests(unittest.TestCase):
         parser.feed((ROOT / "index.html").read_text(encoding="utf-8"))
         self.assertEqual("manifest.webmanifest", parser.manifest)
         self.assertIn("pwa.js?v=20260708-1", parser.assets)
+        self.assertIn("i18n.js?v=20260709-1", parser.assets)
 
         manifest = json.loads((ROOT / "manifest.webmanifest").read_text(encoding="utf-8"))
         self.assertEqual("KINETIQ", manifest["short_name"])
@@ -64,7 +65,19 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("./index.html", service_worker)
         self.assertIn("./manifest.webmanifest", service_worker)
         self.assertIn("./pwa.js", service_worker)
+        self.assertIn("./i18n.js", service_worker)
         self.assertIn("request.mode === 'navigate'", service_worker)
+
+    def test_language_selector_and_dictionaries_exist(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertIn("data-language-select", index)
+        self.assertLess(index.index("i18n.js?v=20260709-1"), index.index("app.js"))
+
+        i18n = (ROOT / "i18n.js").read_text(encoding="utf-8")
+        self.assertIn("ru:", i18n)
+        self.assertIn("tr:", i18n)
+        self.assertIn("'Good morning,': 'Доброе утро,'", i18n)
+        self.assertIn("'Good morning,': 'Günaydın,'", i18n)
 
     def test_vercel_scanner_route_is_configured(self):
         config = json.loads((ROOT / "vercel.json").read_text(encoding="utf-8"))

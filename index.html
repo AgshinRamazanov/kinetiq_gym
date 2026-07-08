@@ -45,6 +45,13 @@
       <header class="topbar">
         <button class="avatar profile-trigger" aria-label="Open profile" data-open="login">SK</button>
         <div class="brand-mark kinetiq-brand"><span class="brand-k" aria-hidden="true"><i></i></span> KINETIQ</div>
+        <label class="language-picker" aria-label="Language">
+          <select data-language-select>
+            <option value="en">EN</option>
+            <option value="ru">RU</option>
+            <option value="tr">TR</option>
+          </select>
+        </label>
         <button class="icon-button" aria-label="Notifications" data-open="notifications">
           <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i></i>
         </button>
@@ -155,6 +162,7 @@
     <div class="toast" id="toast">Coming together nicely — saved.</div>
   </main>
   <script src="supabase-config.js"></script>
+  <script src="i18n.js?v=20260709-1"></script>
   <script src="app.js"></script>
   <script src="home.js?v=20260707-3"></script>
   <script src="train.js?v=20260707-2"></script>

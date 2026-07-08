@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kinetiq-shell-v20260708-1';
+const CACHE_NAME = 'kinetiq-shell-v20260709-1';
 const APP_SHELL = [
   './',
   './index.html',
@@ -28,6 +28,7 @@ const APP_SHELL = [
   './insights.css',
   './reminders.css',
   './supabase-config.js',
+  './i18n.js',
   './app.js',
   './home.js',
   './train.js',
