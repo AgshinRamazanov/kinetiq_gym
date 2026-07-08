@@ -1,0 +1,185 @@
+const programCopy = {
+  muscle: { title: 'Forge<br>Foundation', subtitle: 'Progressive strength · 4 days/week', label: 'Build muscle' },
+  lose: { title: 'Lean<br>Momentum', subtitle: 'Strength circuits · 5 days/week', label: 'Lose fat' },
+  gain: { title: 'Mass<br>Method', subtitle: 'Hypertrophy & recovery · 4 days/week', label: 'Gain weight' }
+};
+let trainingGoal = readLocal('form-training-goal', 'muscle');
+let trainingPlace = 'gym';
+let trainingBody = 'upper';
+
+const exercises = {
+  gym: {
+    upper: ['Barbell Bench Press', 'Dumbbell Palm Rotational Bent Over Row', 'Seated Dumbbell Shoulder Press', 'Pull-Up / Chin-Up'],
+    lower: ['Barbell Back Squat', 'Dumbbell Deadlift', 'Lever Horizontal Leg Press', 'Treadmill Running'],
+    full: ['Barbell Back Squat', 'Barbell Bench Press', 'Dumbbell Palm Rotational Bent Over Row', 'Dumbbell Deadlift'],
+    core: ['Cable Kneeling Crunch', 'Hanging Straight Leg Raise', 'Lever Seated Crunch', 'Vertical Leg Raise', 'Bicycle Twisting Crunch']
+  },
+  home: {
+    upper: ['Push-Up', 'Close-Grip Push-Up', 'Incline Push-Up', 'Bench Dips'],
+    lower: ['Squat', 'Jump Step-Up', 'Donkey Calf Raise', 'Burpee'],
+    full: ['Burpee', 'Squat', 'Push-Up', 'Jumping Jack', 'V-Up'],
+    core: ['Side Plank', 'Lying Leg Raise', 'Sit-Up', 'V-Up', 'Twisting Crunch']
+  }
+};
+
+// Only pairs whose source page explicitly identifies the demonstrated movement.
+// Everything else is intentionally withheld instead of showing misleading footage.
+const verifiedExerciseVideos = {
+  'Dumbbell bench press': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Video%20showing%20how%20to%20perform%20the%20dumbbell%20bench%20press%20and%20the%20dumbbell%20incline%20bench%20press.webm','https://commons.wikimedia.org/wiki/File:Video_showing_how_to_perform_the_dumbbell_bench_press_and_the_dumbbell_incline_bench_press.webm','Wikimedia Commons'],
+  'Bent-over row': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Bent-over%20row%20-%20exercise%20demonstration%20video.webm','https://commons.wikimedia.org/wiki/File:Bent-over_row_-_exercise_demonstration_video.webm','Wikimedia Commons'],
+  'Shoulder press': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Shoulder%20press%20-%20exercise%20demonstration%20video.webm','https://commons.wikimedia.org/wiki/File:Shoulder_press_-_exercise_demonstration_video.webm','Wikimedia Commons'],
+  'Pull-ups': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Pull-ups%20-%20exercise%20demonstration%20video.webm','https://commons.wikimedia.org/wiki/File:Pull-ups_-_exercise_demonstration_video.webm','Wikimedia Commons'],
+  'Deadlift': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Deadlift%20-%20exercise%20demonstration%20video.webm','https://commons.wikimedia.org/wiki/File:Deadlift_-_exercise_demonstration_video.webm','Wikimedia Commons'],
+  'Leg press': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Hip%20Sled%20-%20How%20to%20perform%20a%2045%20degree%20leg%20press.webm','https://commons.wikimedia.org/wiki/File:Hip_Sled_-_How_to_perform_a_45_degree_leg_press.webm','Wikimedia Commons'],
+  'Hanging crunches': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Hanging%20crunches%20-%20exercise%20demonstration%20video.webm','https://commons.wikimedia.org/wiki/File:Hanging_crunches_-_exercise_demonstration_video.webm','Wikimedia Commons'],
+  'Leg raises': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Leg%20raises%20-%20exercise%20demonstration%20video.webm','https://commons.wikimedia.org/wiki/File:Leg_raises_-_exercise_demonstration_video.webm','Wikimedia Commons'],
+  'Gym push-up': ['https://videos.pexels.com/video-files/4742661/4742661-hd_1920_1080_25fps.mp4','https://www.pexels.com/video/man-doing-a-push-up-at-the-gym-4742661/'],
+  'Kettlebell push-up': ['https://videos.pexels.com/video-files/4812839/4812839-hd_1920_1080_25fps.mp4','https://www.pexels.com/video/video-of-man-doing-push-ups-exercises-4812839/'],
+  'Barbell back squat': ['https://videos.pexels.com/video-files/5319755/5319755-hd_1920_1080_25fps.mp4','https://www.pexels.com/video/man-doing-barbell-squats-5319755/'],
+  'Bodyweight squat': ['https://videos.pexels.com/video-files/6326764/6326764-hd_1920_1080_25fps.mp4','https://www.pexels.com/video/man-doing-squats-6326764/'],
+  'Barbell warm-up squat': ['https://videos.pexels.com/video-files/6114481/6114481-hd_1920_1080_25fps.mp4','https://www.pexels.com/video/man-shoulder-squats-with-an-empty-barbell-6114481/'],
+  'Treadmill finisher': ['https://videos.pexels.com/video-files/4065567/4065567-hd_1920_1080_30fps.mp4','https://www.pexels.com/video/a-person-running-using-the-treadmill-4065567/'],
+  'Slow push-up hold': ['https://videos.pexels.com/video-files/6389834/6389834-hd_1920_1080_25fps.mp4','https://www.pexels.com/video/man-doing-push-ups-6389834/'],
+  'Home push-up': ['https://videos.pexels.com/video-files/4367576/4367576-hd_1920_1080_30fps.mp4','https://www.pexels.com/video/a-man-doing-push-ups-4367576/']
+};
+
+const openExerciseDbSource = 'https://github.com/amiinwani/free-exercise-db-with-videos';
+Object.assign(verifiedExerciseVideos, {
+  'Barbell Bench Press':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/barbell-bench-press.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Dumbbell Palm Rotational Bent Over Row':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/dumbbell-palm-rotational-bent-over-row.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Seated Dumbbell Shoulder Press':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/dumbbell-bench-seated-press.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Pull-Up / Chin-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/chin-ups-pull-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Barbell Back Squat':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/classic-barbell-squat.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Dumbbell Deadlift':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/dumbbell-deadlift.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Lever Horizontal Leg Press':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/lever-horizontal-leg-press.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Treadmill Running':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/treadmill-running.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Cable Kneeling Crunch':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/cable-kneeling-crunch.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Hanging Straight Leg Raise':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/hanging-straight-leg-raise.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Lever Seated Crunch':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/lever-seated-crunch-1.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Vertical Leg Raise':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/vertical-leg-raise-on-parallel-bars.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Bicycle Twisting Crunch':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/45-degree-bycicle-twisting-crunch.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Push-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/push-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Close-Grip Push-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/close-grip-push-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Incline Push-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/incline-push-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Bench Dips':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/bench-dips.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Squat':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/squat.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Jump Step-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/jump-step-up.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Donkey Calf Raise':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/donkey-calf-raise.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Burpee':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/burpee.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Jumping Jack':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/jumping-jack.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Side Plank':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/side-bridge-side-plank.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Lying Leg Raise':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/lying-floor-leg-raise.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Sit-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/sit-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'V-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/v-up.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
+  'Twisting Crunch':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/twisting-crunch.mp4',openExerciseDbSource,'Free Exercise DB · MIT']
+});
+
+function setGoal(goal) {
+  trainingGoal = goal; writeLocal('form-training-goal', goal);
+  document.querySelectorAll('.goal-switch button').forEach(button => button.classList.toggle('selected', button.dataset.goal === goal));
+  const copy = programCopy[goal];
+  document.querySelector('.week-hero h2').innerHTML = copy.title;
+  document.querySelector('.week-hero p').textContent = copy.subtitle;
+  document.getElementById('profile-goal').textContent = copy.label;
+}
+document.querySelectorAll('.goal-switch button').forEach(button => button.addEventListener('click', () => setGoal(button.dataset.goal)));
+setGoal(trainingGoal);
+
+function bindSingleChoice(selector, setter) {
+  document.querySelectorAll(`${selector} button`).forEach(button => button.addEventListener('click', () => {
+    document.querySelectorAll(`${selector} button`).forEach(item => item.classList.remove('selected'));
+    button.classList.add('selected'); setter(button.dataset.value);
+  }));
+}
+bindSingleChoice('.location-choice', value => trainingPlace = value);
+bindSingleChoice('.body-choice', value => trainingBody = value);
+
+function openExercise(name, index, total, options = {}) {
+  if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
+  const exercisePlace = options.place || trainingPlace;
+  const home = exercisePlace === 'home';
+  document.getElementById('exercise-position').textContent = `EXERCISE ${index + 1} OF ${total}`;
+  document.getElementById('exercise-title').innerHTML = name.replace(' ', '<br>');
+  document.getElementById('exercise-cue').textContent = home
+    ? 'Move with control and stop the set when your form begins to change. Use a stable surface and clear the space around you.'
+    : 'Choose a load that leaves two good repetitions in reserve. Keep the movement controlled through the full range.';
+  document.getElementById('exercise-sets').textContent = trainingGoal === 'lose' ? '01 / 03' : '01 / 04';
+  document.getElementById('exercise-reps').textContent = trainingGoal === 'muscle' ? '8–12' : trainingGoal === 'gain' ? '10–15' : '12–15';
+  document.getElementById('exercise-rest').textContent = trainingGoal === 'lose' ? '45s' : '75s';
+  const media = verifiedExerciseVideos[name];
+  const player = document.getElementById('exercise-video');
+  const unavailable = document.getElementById('video-unavailable');
+  const credit = document.querySelector('.video-credit');
+  player.pause();
+  if (media) {
+    player.src = media[0]; player.muted = true; player.load(); player.style.display = 'block'; unavailable.classList.remove('show');
+    credit.href = media[1]; credit.textContent = `Verified source for ${name} · ${media[2] || 'Pexels'} ↗`; credit.style.display = 'block';
+  } else {
+    player.removeAttribute('src'); player.load(); player.style.display = 'none'; unavailable.classList.add('show'); credit.style.display = 'none';
+  }
+  const sheet = document.getElementById('workout'); sheet.classList.add('open'); sheet.setAttribute('aria-hidden', 'false');
+  const workoutContent = sheet.querySelector('.sheet-content'); if (workoutContent) workoutContent.scrollTop = 0;
+  setTimeout(() => document.activeElement?.blur?.(), 80);
+  if (media) player.play().catch(() => {});
+  window.dispatchEvent(new CustomEvent('exerciseOpened',{detail:{name,index,total,place:exercisePlace,goal:trainingGoal,body:trainingBody}}));
+}
+
+document.getElementById('exercise-video')?.addEventListener('touchstart', () => document.activeElement?.blur?.(), { passive:true });
+document.querySelector('.video-stage')?.addEventListener('pointerdown', () => document.activeElement?.blur?.());
+
+document.getElementById('generate-workout').addEventListener('click', () => {
+  const list = exercises[trainingPlace][trainingBody];
+  const placeLabel = trainingPlace === 'gym' ? 'GYM' : 'HOME';
+  const bodyLabel = document.querySelector('.body-choice .selected').textContent;
+  document.querySelector('#plan .section-title span').textContent = `${placeLabel} · ${bodyLabel.toUpperCase()}`;
+  document.querySelector('#plan .section-title h2').textContent = 'Today’s generated session';
+  const container = document.getElementById('session-list'); container.innerHTML = '';
+  list.forEach((name, index) => {
+    const button = document.createElement('button'); button.className = 'session generated';
+    button.dataset.exerciseName = name;
+    button.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span><div><small>${placeLabel} · ${programCopy[trainingGoal].label.toUpperCase()}</small><h3>${name}</h3><p>${trainingGoal === 'lose' ? '3' : '4'} sets · form video included</p></div><b>▶</b>`;
+    const playIcon = button.querySelector('b'); playIcon.textContent = ''; playIcon.className = 'session-play'; playIcon.setAttribute('aria-hidden','true');
+    const completedToday = readLocal('form-exercise-completions',[]).some(item => item.exercise === name && isToday(item.date));
+    if (completedToday) { button.classList.add('done'); button.querySelector('small').textContent = 'COMPLETED TODAY'; button.querySelector('b').textContent = '✓'; }
+    button.addEventListener('click', () => openExercise(button.dataset.exerciseName, index, list.length)); container.appendChild(button);
+  });
+  container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  homeToast('Your workout is ready.');
+});
+
+window.addEventListener('exerciseCompleted',event => {
+  document.querySelectorAll('#session-list [data-exercise-name]').forEach(button => {
+    if (button.dataset.exerciseName === event.detail.name) {
+      button.classList.add('done'); button.querySelector('small').textContent = 'COMPLETED TODAY'; button.querySelector('b').textContent = '✓';
+    }
+  });
+});
+
+function renderTrainProfile() {
+  const profile = readLocal('form-profile', null);
+  const name = profile?.name || 'Guest profile';
+  const email = profile?.email || 'Log in from the Today tab';
+  const initials = profile ? profile.name.split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase() : 'GU';
+  document.getElementById('profile-name').textContent = name;
+  document.getElementById('profile-email').textContent = email;
+  document.getElementById('profile-badge').textContent = initials;
+  document.querySelectorAll('.profile-trigger').forEach(avatar => {
+    avatar.textContent = profile ? initials : 'SK';
+    avatar.classList.toggle('logged-in', Boolean(profile));
+  });
+  const logout = document.getElementById('logout-button'); logout.textContent = profile ? 'Log out' : 'Go to login';
+}
+renderTrainProfile();
+document.querySelector('[data-open="train-profile"]')?.addEventListener('click', renderTrainProfile);
+document.getElementById('logout-button').addEventListener('click', () => {
+  const profile = readLocal('form-profile', null);
+  if (!profile) {
+    document.getElementById('train-profile').classList.remove('open');
+    navigate('home'); document.getElementById('login').classList.add('open'); return;
+  }
+  localStorage.removeItem('form-profile');
+  document.querySelector('.topbar .avatar').textContent = 'SK';
+  document.querySelector('.topbar .avatar').classList.remove('logged-in');
+  document.querySelector('.hero-copy h1').innerHTML = 'Good morning,<br><em>Senan.</em>';
+  renderTrainProfile(); document.getElementById('train-profile').classList.remove('open'); homeToast('You’re logged out.');
+});

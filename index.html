@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#f4f0e8" />
+  <meta name="application-name" content="KINETIQ" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="KINETIQ" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Kinetiq — Personal training, made personal</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="bodyfat.css" />
+  <link rel="stylesheet" href="home.css?v=20260708-1" />
+  <link rel="stylesheet" href="train.css" />
+  <link rel="stylesheet" href="fuel.css" />
+  <link rel="stylesheet" href="swap.css" />
+  <link rel="stylesheet" href="progress.css" />
+  <link rel="stylesheet" href="scanner.css" />
+  <link rel="stylesheet" href="logged.css" />
+  <link rel="stylesheet" href="macro.css" />
+  <link rel="stylesheet" href="meal-log.css" />
+  <link rel="stylesheet" href="motion.css" />
+  <link rel="stylesheet" href="honest-plan.css" />
+  <link rel="stylesheet" href="bmi.css" />
+  <link rel="stylesheet" href="video-audit.css" />
+  <link rel="stylesheet" href="body-methods.css" />
+  <link rel="stylesheet" href="onboarding.css?v=20260707-1" />
+  <link rel="stylesheet" href="workout-tracker.css" />
+  <link rel="stylesheet" href="substitutions.css" />
+  <link rel="stylesheet" href="meal-preferences.css" />
+  <link rel="stylesheet" href="cloud.css" />
+  <link rel="stylesheet" href="insights.css" />
+  <link rel="stylesheet" href="reminders.css" />
+</head>
+<body>
+  <main class="phone-shell">
+    <section class="screen active" id="home">
+      <header class="topbar">
+        <button class="avatar profile-trigger" aria-label="Open profile" data-open="login">SK</button>
+        <div class="brand-mark kinetiq-brand"><span class="brand-k" aria-hidden="true"><i></i></span> KINETIQ</div>
+        <button class="icon-button" aria-label="Notifications" data-open="notifications">
+          <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i></i>
+        </button>
+      </header>
+
+      <div class="hero-copy">
+        <p class="eyebrow">SATURDAY · JUL 04</p>
+        <h1>Good morning,<br><em>Senan.</em></h1>
+        <p>Your body has a plan. Let’s meet it halfway.</p>
+      </div>
+
+      <button class="scan-card" data-open="scanner">
+        <div class="scan-glow"></div>
+        <div class="scan-icon">
+          <svg viewBox="0 0 32 32"><path d="M5 11V7a2 2 0 0 1 2-2h4M21 5h4a2 2 0 0 1 2 2v4M27 21v4a2 2 0 0 1-2 2h-4M11 27H7a2 2 0 0 1-2-2v-4"/><circle cx="16" cy="16" r="5"/></svg>
+        </div>
+        <div><strong>Snap your meal</strong><span>Calories & macros in seconds</span></div>
+        <b>→</b>
+      </button>
+
+      <div class="section-title"><div><span>TODAY</span><h2>Your rhythm</h2></div><button data-nav="progress">See details</button></div>
+      <div class="rhythm-grid">
+        <button class="calorie-card rhythm-button" data-open="goals" aria-label="Edit daily goals">
+          <div class="ring" style="--progress:72"><div><strong id="tracked-calories">1,420</strong><span>of <b id="calories-goal-label">1,980</b> kcal</span></div></div>
+          <div class="macros">
+            <div><i class="protein"></i><span>Protein</span><strong><span id="tracked-protein">98</span>/<b id="protein-goal-label">145</b><small>g</small></strong></div>
+            <div><i class="carbs"></i><span>Carbs</span><strong><span id="tracked-carbs">142</span>/<b id="carbs-goal-label">210</b><small>g</small></strong></div>
+            <div><i class="fat"></i><span>Fat</span><strong><span id="tracked-fat">51</span>/<b id="fat-goal-label">66</b><small>g</small></strong></div>
+            <div><i class="water"></i><span>Water</span><strong>1.4/<b id="water-goal-label">2.5</b><small>L</small></strong></div>
+          </div>
+        </button>
+        <article class="streak-card"><span>STREAK</span><strong>12</strong><small>days</small><div class="flame" aria-hidden="true"></div></article>
+      </div>
+
+      <div class="section-title next-title"><div><span>NEXT UP</span><h2>Today’s training</h2></div></div>
+      <button class="workout-card" data-nav="plan">
+        <div class="workout-photo"><video muted autoplay loop playsinline poster="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=900&q=85"><source src="https://storage.googleapis.com/coverr-main/mp4/Mt_Baker.mp4" type="video/mp4"></video><span><i class="ui-play-icon" aria-hidden="true"></i>38 MIN</span></div>
+        <div class="workout-info"><span>WEEK 3 · DAY 2</span><h3>Upper body<br>strength</h3><div><b>7 exercises</b><i>→</i></div></div>
+      </button>
+    </section>
+
+    <section class="screen" id="plan">
+      <header class="page-header"><div><p class="eyebrow">YOUR PROGRAM</p><h1>Built for <em>you.</em></h1></div><button class="mini-avatar train-avatar profile-trigger" aria-label="Open profile" data-open="login">SK</button></header>
+      <div class="goal-switch" role="tablist"><button class="selected" data-goal="muscle">Build muscle</button><button data-goal="lose">Lose fat</button><button data-goal="gain">Gain weight</button></div>
+      <article class="week-hero"><div><span>ACTIVE PLAN · 8 WEEKS</span><h2>Forge<br>Foundation</h2><p>Progressive strength · 4 days/week</p></div><div class="week-number"><small>WEEK</small><b>03</b><span>of 8</span></div></article>
+      <section class="workout-builder"><div class="builder-heading"><div><span>QUICK SESSION</span><h2>Train your way</h2></div><small>2 choices</small></div><p>Where are you training?</p><div class="choice-row location-choice"><button class="selected" data-value="gym">Gym</button><button data-value="home">At home</button></div><p>What do you want to train?</p><div class="body-choice"><button class="selected" data-value="upper">Upper body</button><button data-value="lower">Lower body</button><button data-value="full">Full body</button><button data-value="core">Core</button></div><button class="generate-button" id="generate-workout">Generate today’s workout <span>→</span></button></section>
+      <div class="week-row"><button>1<small>✓</small></button><button>2<small>✓</small></button><button class="active">3<small>NOW</small></button><button>4</button><button>5</button></div>
+      <div class="section-title"><div><span>THIS WEEK</span><h2>Four sessions</h2></div></div>
+      <div class="session-list" id="session-list">
+        <button class="session done"><span>MON</span><div><small>COMPLETED</small><h3>Lower body power</h3><p>42 min · 8 exercises</p></div><b>✓</b></button>
+        <button class="session today" data-open="workout"><span>WED</span><div><small>TODAY</small><h3>Upper body strength</h3><p>38 min · 7 exercises</p></div><b>→</b></button>
+        <button class="session"><span>FRI</span><div><small>UPCOMING</small><h3>Full body volume</h3><p>46 min · 9 exercises</p></div><b>→</b></button>
+        <button class="session"><span>SUN</span><div><small>UPCOMING</small><h3>Mobility & core</h3><p>28 min · 6 exercises</p></div><b>→</b></button>
+      </div>
+    </section>
+
+    <section class="screen" id="nutrition">
+      <header class="page-header"><div><p class="eyebrow">EAT WITH INTENT</p><h1>Fuel the <em>work.</em></h1></div><button class="edit-goals-button" data-open="goals" aria-label="Edit nutrition goals"><b>✎</b><span>Edit goals</span></button></header>
+      <div class="fuel-mode" role="tablist"><button class="selected" data-fuel-mode="match">Match my goals</button><button data-fuel-mode="lose">Fat loss</button><button data-fuel-mode="gain">Weight gain</button></div>
+      <p class="mode-note" id="fuel-mode-note">Your meal plan will match the daily targets saved on Home.</p>
+      <div class="nutrition-summary"><div><span id="nutrition-target-label">DAILY TARGET</span><strong id="nutrition-calories">1,980</strong><small>kcal</small></div><button data-open="scanner"><b>＋</b><span>Scan<br>a meal</span></button></div>
+      <div class="macro-heading"><span>DAILY MACRO GOALS</span><small>Bar shows what you’ve eaten</small></div><div class="macro-bars">
+        <div><span>PROTEIN <b id="nutrition-protein">0 / 145g</b></span><i><em id="nutrition-protein-bar" style="width:0"></em></i></div>
+        <div><span>CARBS <b id="nutrition-carbs">0 / 210g</b></span><i><em id="nutrition-carbs-bar" style="width:0"></em></i></div>
+        <div><span>FATS <b id="nutrition-fat">0 / 66g</b></span><i><em id="nutrition-fat-bar" style="width:0"></em></i></div>
+      </div>
+      <div class="plan-accuracy"><span>PLAN MATCH</span><b id="plan-match">100%</b><small id="plan-total">0 kcal planned</small></div>
+      <div class="section-title"><div><span>TODAY</span><h2>Your meal plan</h2></div><button id="swap-meal" data-open="meal-swap">Swap a meal</button></div>
+      <div class="meal-list" id="fuel-meal-list"></div>
+      <div class="section-title logged-title"><div><span>ACTUALLY EATEN</span><h2>Logged today</h2></div></div><div class="logged-meals" id="logged-meals"><p>No meals logged yet.</p></div>
+    </section>
+
+    <section class="screen" id="progress">
+      <header class="page-header"><div><p class="eyebrow">BODY & PROGRESS</p><h1>More than a <em>number.</em></h1></div><button class="mini-avatar profile-trigger" aria-label="Open profile" data-open="login">SK</button></header>
+      <article class="body-card"><div><span>EST. BODY FAT</span><strong><b id="progress-bodyfat">—</b><small>%</small></strong><p id="bodyfat-change">Complete your first check-in</p></div><div class="body-lines"><i></i><i></i><i></i><i></i><i></i><i></i></div></article>
+      <button class="measure-button" data-open="bodyfat"><span>＋</span><div><strong>New body check-in</strong><small>Measurements, photos & body fat</small></div><b>→</b></button>
+      <div class="section-title"><div><span>8 WEEK TREND</span><h2>Quiet progress</h2></div></div>
+      <div class="chart-card"><div class="chart-labels"><span id="chart-high">—</span><span id="chart-mid">—</span><span id="chart-low">—</span></div><svg viewBox="0 0 330 140" preserveAspectRatio="none"><defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef5b42" stop-opacity=".3"/><stop offset="1" stop-color="#ef5b42" stop-opacity="0"/></linearGradient></defs><path class="area" id="progress-area" d=""/><path class="line" id="progress-line" d=""/><circle id="progress-dot" cx="0" cy="0" r="5"/></svg><div class="chart-empty" id="chart-empty">Your check-ins will draw the trend.</div><div class="chart-dates"><span id="chart-start">—</span><span>BODY FAT TREND</span><span id="chart-end">—</span></div></div>
+      <div class="stats-row"><div><span>WEIGHT</span><strong><b id="progress-weight">—</b><small>kg</small></strong><b id="weight-change">—</b></div><div><span>LEAN MASS</span><strong><b id="progress-lean">—</b><small>kg</small></strong><b id="lean-change">—</b></div><div><span>BMI</span><strong><b id="progress-bmi">—</b></strong><b id="bmi-category">—</b></div><div><span>BMI-BASED FAT</span><strong><b id="progress-bmi-fat">—</b><small>%</small></strong><b>ALTERNATIVE</b></div></div>
+      <div class="section-title history-title"><div><span>CHECK-IN HISTORY</span><h2>Recent entries</h2></div></div><div class="checkin-history" id="checkin-history"><p>No saved check-ins yet.</p></div>
+    </section>
+
+    <nav class="bottom-nav">
+      <button class="active" data-nav="home"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg><span>Today</span></button>
+      <button data-nav="plan"><svg viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M3 8h18M3 16h18"/></svg><span>Train</span></button>
+      <button class="nav-scan" data-open="scanner"><span><svg viewBox="0 0 24 24"><path d="M4 9V6a2 2 0 0 1 2-2h3M15 4h3a2 2 0 0 1 2 2v3M20 15v3a2 2 0 0 1-2 2h-3M9 20H6a2 2 0 0 1-2-2v-3"/><circle cx="12" cy="12" r="3"/></svg></span><small>Scan</small></button>
+      <button data-nav="nutrition"><svg viewBox="0 0 24 24"><path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 3c-3 2-4 8 0 10v8M17 3v10"/></svg><span>Fuel</span></button>
+      <button data-nav="progress"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V4M16 19v-7M22 19H2"/></svg><span>Progress</span></button>
+    </nav>
+
+    <div class="sheet" id="scanner" aria-hidden="true"><div class="sheet-content scanner-content"><button class="close" data-close>×</button><div class="camera-view"><img id="scan-preview" src="https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85" alt="Food preview"><div class="scan-frame"><i></i></div><span id="scan-status">Choose or take a clear food photo</span></div><div class="scanner-start" id="scanner-start"><input id="food-photo" type="file" accept="image/jpeg,image/png,image/webp" capture="environment"><label for="food-photo" class="photo-button">Camera or photo library</label><button class="primary" id="analyze-food" disabled>Analyze food</button><p>For better estimates, include the whole plate and keep ingredients visible.</p></div><div class="scan-result" id="scan-result"><div><small>MEAL ESTIMATE</small><h2 id="scan-food-name">—</h2><p id="scan-food-items">—</p></div><strong><span id="scan-calories">0</span><small>kcal</small></strong><div class="result-macros"><span><b id="scan-protein">0g</b> Protein</span><span><b id="scan-carbs">0g</b> Carbs</span><span><b id="scan-fat">0g</b> Fat</span></div><p class="confidence-note" id="scan-confidence"></p><div class="scan-actions"><button class="secondary" id="discard-scan">Leave for now</button><button class="primary" id="add-scan">Add to today</button></div></div></div></div>
+
+    <div class="sheet" id="workout" aria-hidden="true"><div class="sheet-content workout-sheet"><button class="close light" data-close>×</button><div class="video-stage"><video id="exercise-video" playsinline controls poster="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1100&q=90"></video><div class="video-unavailable" id="video-unavailable"><b>MOVEMENT GUIDE PENDING</b><span>We have not verified an exact demonstration for this exercise yet.</span></div><div class="video-tag">VERIFIED MOVEMENT GUIDE</div></div><div class="exercise-copy"><small id="exercise-position">EXERCISE 2 OF 7</small><h2 id="exercise-title">Dumbbell<br>bench press</h2><p id="exercise-cue">Keep your shoulder blades gently pinned. Lower with control until elbows sit just below the bench line.</p><div class="record-strip"><span>PERSONAL BEST</span><b id="exercise-best">No sets logged yet</b></div><div class="set-entry"><label>REPS<input id="set-reps-input" type="number" min="1" max="100" value="10"></label><label>WEIGHT<input id="set-weight-input" type="number" min="0" max="500" step="0.5" value="0"><i>kg</i></label><label>EFFORT<select id="set-effort-input"><option value="easy">Easy</option><option value="good" selected>Good</option><option value="hard">Hard</option></select></label></div><div class="sets"><div><span>SET</span><b id="exercise-sets">01 / 04</b></div><div><span>TARGET</span><b id="exercise-reps">10</b></div><div><span>REST</span><b id="exercise-rest">75s</b></div></div><div class="logged-sets" id="logged-sets"></div><div class="rest-timer" id="rest-timer"><span>REST</span><b id="rest-countdown">75</b><small>seconds</small><button id="skip-rest">Skip</button></div><a class="video-credit" href="#" target="_blank" rel="noopener">Verified source · Free Exercise DB ↗</a><button class="primary" id="complete-set" data-action="next-exercise">Complete set <span>→</span></button></div></div></div>
+
+    <div class="sheet" id="bodyfat" aria-hidden="true"><div class="sheet-content form-sheet"><button class="close" data-close>×</button><p class="eyebrow">BODY CHECK-IN</p><h2>Let’s estimate<br><em>your body fat.</em></h2><p class="muted">Primary: U.S. Navy circumference method. Alternative: adult BMI-and-age estimate.</p><details class="measure-guide"><summary>How to measure accurately</summary><p><b>Men:</b> abdomen at navel. <b>Women:</b> natural waist. Measure hips at the widest point and neck just below the larynx. Keep the tape snug, measure after a relaxed exhale, and use the same time of day.</p></details><form id="body-form"><div class="input-pair"><label>Sex used by formulas<select id="sex"><option value="male">Male</option><option value="female">Female</option></select></label><label>Age<input id="body-age" type="number" value="30" min="18" max="100" required><i>years</i></label></div><div class="input-pair"><label>Height<input id="height" type="number" value="180" min="100" max="250" step="0.1" required><i>cm</i></label><label>Weight<input id="body-weight" type="number" value="76.8" min="30" max="350" step="0.1" required><i>kg</i></label></div><div class="input-pair"><label>Abdomen / waist<input id="waist" type="number" value="86" min="40" max="200" step="0.1" required><i>cm</i></label><label>Neck<input id="neck" type="number" value="38" min="20" max="80" step="0.1" required><i>cm</i></label></div><label class="hip-field">Hips<input id="hip" type="number" value="98" min="40" max="200" step="0.1"><i>cm</i></label><p class="form-error" id="body-error" role="alert"></p><button class="primary" type="submit">Calculate & save check-in</button></form><div class="calculated" id="calculated"><small>NAVY BODY-FAT ESTIMATE</small><strong>—</strong><span>—</span><div class="bmi-result"><small>BMI</small><b id="calculated-bmi">—</b><em id="calculated-bmi-category">—</em></div><div class="bmi-result"><small>BMI-BASED FAT</small><b id="calculated-bmi-fat">—</b><em>adult estimate</em></div><p>These are screening estimates, not medical diagnoses.</p></div></div></div>
+    <div class="sheet" id="login" aria-hidden="true"><div class="sheet-content compact-sheet"><button class="close" data-close>×</button><p class="eyebrow">YOUR ACCOUNT</p><h2 id="account-title">Welcome<br><em>back.</em></h2><p class="muted" id="account-subtitle">Log in to keep your goals and progress synced.</p><form id="login-form" class="stack-form"><label>Name<input id="login-name" type="text" placeholder="Your name" required></label><label>Email<input id="login-email" type="email" placeholder="you@example.com" required></label><label>Password<input id="login-password" type="password" placeholder="••••••••" minlength="6" required></label><button class="primary" type="submit">Log in</button><button class="text-button" type="button" data-action="create-account">Create an account</button></form><div class="login-success account-panel" id="login-success"><div class="account-card"><div class="account-avatar" id="home-profile-badge">SK</div><div><small>SIGNED IN</small><h3 id="home-profile-name">Your profile</h3><p id="home-profile-email">Your profile is ready on this device.</p></div></div><div class="profile-details home-profile-details"><div><span>ACTIVE GOAL</span><strong id="home-profile-goal">Build muscle</strong></div><div><span>DAILY TARGET</span><strong id="home-profile-calories">1,980 kcal</strong></div><div><span>SYNC</span><strong id="home-profile-sync">This device</strong></div></div><button class="setup-button" id="home-edit-setup">Edit personal setup</button><button class="secondary" id="home-edit-goals">Edit daily goals</button><button class="logout-button" id="home-logout-button">Log out</button></div></div></div>
+
+    <div class="sheet" id="notifications" aria-hidden="true"><div class="sheet-content compact-sheet"><button class="close" data-close>×</button><p class="eyebrow">INBOX</p><div class="sheet-heading"><h2>Notifications</h2><button id="mark-read">Mark all read</button></div><div class="notification-list"><article class="notification unread"><i>↗</i><div><strong>Today’s workout is ready</strong><p>Upper body strength · 38 minutes</p><small>12 MIN AGO</small></div></article><article class="notification unread"><i>◉</i><div><strong>Protein check</strong><p>You’re 47g away from today’s target.</p><small>1 HOUR AGO</small></div></article><article class="notification"><i>✓</i><div><strong>New personal rhythm</strong><p>Your weekly consistency improved by 8%.</p><small>YESTERDAY</small></div></article></div></div></div>
+
+    <div class="sheet" id="goals" aria-hidden="true"><div class="sheet-content compact-sheet goals-sheet"><button class="close" data-close>×</button><p class="eyebrow">YOUR RHYTHM</p><h2>Set your<br><em>daily goals.</em></h2><p class="muted">Choose targets that feel sustainable. You can adjust them anytime.</p><form id="goals-form" class="goal-form"><label class="goal-input"><span><i class="goal-icon calories">⌁</i><b>Calories</b><small>Daily energy target</small></span><div><input id="goal-calories" type="number" min="800" max="6000" step="10" required><em>kcal</em></div></label><label class="goal-input"><span><i class="goal-icon protein">P</i><b>Protein</b><small>Recovery & muscle</small></span><div><input id="goal-protein" type="number" min="20" max="400" required><em>g</em></div></label><label class="goal-input"><span><i class="goal-icon carbs">C</i><b>Carbohydrates</b><small>Training fuel</small></span><div><input id="goal-carbs" type="number" min="20" max="800" required><em>g</em></div></label><label class="goal-input"><span><i class="goal-icon fat">F</i><b>Fat</b><small>Hormones & health</small></span><div><input id="goal-fat" type="number" min="10" max="250" required><em>g</em></div></label><label class="goal-input"><span><i class="goal-icon water">W</i><b>Water</b><small>Daily hydration</small></span><div><input id="goal-water" type="number" min="0.5" max="10" step="0.1" required><em>L</em></div></label><div class="goal-actions"><button type="button" class="secondary" data-close>Cancel</button><button type="submit" class="primary">Save goals</button></div></form></div></div>
+
+    <div class="sheet" id="train-profile" aria-hidden="true"><div class="sheet-content compact-sheet profile-sheet"><button class="close" data-close>×</button><div class="profile-badge" id="profile-badge">SK</div><p class="eyebrow">YOUR PROFILE</p><h2 id="profile-name">Senan</h2><p class="profile-email" id="profile-email">Not logged in</p><div class="profile-details"><div><span>ACTIVE GOAL</span><strong id="profile-goal">Build muscle</strong></div><div><span>TRAINING WEEK</span><strong>3 of 8</strong></div><div><span>WORKOUTS</span><strong>9 completed</strong></div></div><button class="setup-button" id="edit-setup">Edit personal setup</button><button class="logout-button" id="logout-button">Log out</button></div></div>
+
+    <div class="sheet onboarding" id="onboarding" aria-hidden="true"><div class="sheet-content onboarding-sheet"><div class="onboard-top"><div class="brand-mark kinetiq-brand"><span class="brand-k" aria-hidden="true"><i></i></span> KINETIQ</div><button class="onboard-skip" id="onboard-skip">Do later</button></div><div class="onboard-progress"><i id="onboard-progress"></i></div><form id="onboarding-form"><section class="onboard-step active" data-step="0"><p class="eyebrow">01 · YOUR DIRECTION</p><h2>What are we<br><em>building toward?</em></h2><label>Enter your name<input id="setup-name" type="text" placeholder="How should Kinetiq address you?" required></label><p class="field-title">Primary goal</p><div class="setup-options goal-options"><label><input type="radio" name="setup-goal" value="muscle" checked><span><b>Build muscle</b><small>Strength and lean mass</small></span></label><label><input type="radio" name="setup-goal" value="lose"><span><b>Lose fat</b><small>Steady, sustainable deficit</small></span></label><label><input type="radio" name="setup-goal" value="gain"><span><b>Gain weight</b><small>Controlled calorie surplus</small></span></label></div></section><section class="onboard-step" data-step="1"><p class="eyebrow">02 · YOUR BASELINE</p><h2>A few useful<br><em>numbers.</em></h2><div class="setup-grid"><label>Biological sex<select id="setup-sex"><option value="male">Male</option><option value="female">Female</option></select></label><label>Age<input id="setup-age" type="number" value="30" min="18" max="100" required></label><label>Height <small>cm</small><input id="setup-height" type="number" value="175" min="100" max="250" required></label><label>Weight <small>kg</small><input id="setup-weight" type="number" value="70" min="30" max="350" step="0.1" required></label></div><p class="privacy-note">Used to suggest starting targets. You can override every number later.</p></section><section class="onboard-step" data-step="2"><p class="eyebrow">03 · HOW YOU TRAIN</p><h2>Make it fit<br><em>real life.</em></h2><p class="field-title">Experience</p><div class="setup-segment"><label><input type="radio" name="setup-level" value="beginner" checked><span>Beginner</span></label><label><input type="radio" name="setup-level" value="intermediate"><span>Intermediate</span></label><label><input type="radio" name="setup-level" value="advanced"><span>Advanced</span></label></div><p class="field-title">Usual training place</p><div class="setup-segment"><label><input type="radio" name="setup-place" value="gym" checked><span>Gym</span></label><label><input type="radio" name="setup-place" value="home"><span>Home</span></label></div><div class="setup-grid schedule-grid"><label>Days each week<input id="setup-days" type="number" value="4" min="1" max="7" required></label><label>Minutes per session<input id="setup-duration" type="number" value="45" min="15" max="180" step="5" required></label></div><p class="field-title">Equipment available</p><div class="check-grid"><label><input type="checkbox" name="setup-equipment" value="bodyweight" checked><span>Bodyweight</span></label><label><input type="checkbox" name="setup-equipment" value="dumbbells"><span>Dumbbells</span></label><label><input type="checkbox" name="setup-equipment" value="bands"><span>Bands</span></label><label><input type="checkbox" name="setup-equipment" value="bench"><span>Bench</span></label></div></section><section class="onboard-step" data-step="3"><p class="eyebrow">04 · FOOD & SAFETY</p><h2>The details<br><em>that matter.</em></h2><label>Eating style<select id="setup-diet"><option value="balanced">Balanced</option><option value="vegetarian">Vegetarian</option><option value="vegan">Vegan</option><option value="halal">Halal</option></select></label><label>Allergies or foods to avoid<textarea id="setup-allergies" placeholder="Example: peanuts, shellfish"></textarea></label><label>Injuries or movement limitations<textarea id="setup-injuries" placeholder="Example: sensitive right knee"></textarea></label><div class="target-preview"><span>SUGGESTED START</span><div><b id="preview-calories">— kcal</b><small id="preview-macros">—</small></div><p>These are starting estimates, not medical advice. You stay in control.</p></div></section><div class="onboard-actions"><button type="button" class="secondary" id="onboard-back">Back</button><button type="button" class="primary" id="onboard-next">Continue <span>→</span></button></div></form></div></div>
+
+    <div class="sheet" id="meal-swap" aria-hidden="true"><div class="sheet-content compact-sheet meal-swap-sheet"><button class="close" data-close>×</button><p class="eyebrow">SWAP A MEAL</p><h2>Which meal<br><em>should change?</em></h2><p class="muted">The replacement will keep the same calorie and macro allocation.</p><div class="swap-choice-list" id="swap-choice-list"></div></div></div>
+
+    <div class="toast" id="toast">Coming together nicely — saved.</div>
+  </main>
+  <script src="supabase-config.js"></script>
+  <script src="app.js"></script>
+  <script src="home.js?v=20260707-3"></script>
+  <script src="train.js?v=20260707-2"></script>
+  <script src="substitutions.js"></script>
+  <script src="fuel.js"></script>
+  <script src="meal-preferences.js?v=20260706-1"></script>
+  <script src="progress.js?v=20260706-2"></script>
+  <script src="scanner.js?v=20260707-2"></script>
+  <script src="onboarding.js"></script>
+  <script src="workout-tracker.js"></script>
+  <script src="insights.js?v=20260706-1"></script>
+  <script src="reminders.js?v=20260706-1"></script>
+  <script src="pwa.js?v=20260708-1"></script>
+  <script type="module" src="cloud.js?v=20260707-1"></script>
+</body>
+</html>
