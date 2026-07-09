@@ -227,8 +227,11 @@ document.getElementById('logout-button').addEventListener('click', () => {
     navigate('home'); document.getElementById('login').classList.add('open'); return;
   }
   localStorage.removeItem('form-profile');
-  document.querySelector('.topbar .avatar').textContent = 'SK';
-  document.querySelector('.topbar .avatar').classList.remove('logged-in');
-  document.querySelector('.hero-copy h1').innerHTML = 'Good morning,<br><em>Senan.</em>';
+  if (typeof renderProfile === 'function') renderProfile(null);
+  else {
+    document.querySelector('.topbar .avatar').textContent = 'SK';
+    document.querySelector('.topbar .avatar').classList.remove('logged-in');
+    if (typeof renderHomeHero === 'function') renderHomeHero(null);
+  }
   renderTrainProfile(); document.getElementById('train-profile').classList.remove('open'); homeToast('You’re logged out.');
 });

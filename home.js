@@ -1,234 +1,184 @@
-const programCopy = {
-  muscle: { title: 'Forge<br>Foundation', subtitle: 'Progressive strength · 4 days/week', label: 'Build muscle' },
-  lose: { title: 'Lean<br>Momentum', subtitle: 'Strength circuits · 5 days/week', label: 'Lose fat' },
-  gain: { title: 'Mass<br>Method', subtitle: 'Hypertrophy & recovery · 4 days/week', label: 'Gain weight' }
-};
-let trainingGoal = readLocal('form-training-goal', 'muscle');
-let trainingPlace = 'gym';
-let trainingBody = 'upper';
+const defaultGoals = { calories: 1980, protein: 145, carbs: 210, fat: 66, water: 2.5 };
+function localDateId(value = new Date()) {
+  const date = value instanceof Date ? value : new Date(value);
+  const year = date.getFullYear(), month = String(date.getMonth() + 1).padStart(2,'0'), day = String(date.getDate()).padStart(2,'0');
+  return `${year}-${month}-${day}`;
+}
+function isToday(value) { const date = new Date(value); return Number.isFinite(date.getTime()) && localDateId(date) === localDateId(); }
+function appDateTimeSnapshot(value = new Date()) {
+  const date = value instanceof Date ? value : new Date(value);
+  return { dateId: localDateId(date), timestamp: date.getTime(), hour: date.getHours(), minute: date.getMinutes() };
+}
+function readLocal(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
+function writeLocal(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); window.dispatchEvent(new CustomEvent('localDataChanged',{detail:{key,value}})); } catch {} }
+function homeToast(message) { const el = document.getElementById('toast'); el.textContent = message; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1800); }
+function homeT(text) { return window.KinetiqI18n?.t(text) || text; }
+let appDateTime = appDateTimeSnapshot();
+function refreshAppDateTime() {
+  const previous = appDateTime;
+  appDateTime = appDateTimeSnapshot();
+  window.KinetiqDateTime = appDateTime;
+  window.dispatchEvent(new CustomEvent('appTimeChanged', { detail: appDateTime }));
+  if (previous.dateId !== appDateTime.dateId) window.dispatchEvent(new CustomEvent('appDateChanged', { detail: appDateTime }));
+}
+window.KinetiqDateTime = appDateTime;
+function currentGreetingKey(date = new Date()) {
+  const hour = date.getHours();
+  if (hour < 5) return 'Good night,';
+  if (hour < 12) return 'Good morning,';
+  if (hour < 18) return 'Good afternoon,';
+  if (hour < 22) return 'Good evening,';
+  return 'Good night,';
+}
+function renderHomeHero(profile = readLocal('form-profile', null)) {
+  const lang = window.KinetiqI18n?.currentLanguage?.() || document.documentElement.lang || 'en';
+  const now = new Date();
+  const dateLabel = new Intl.DateTimeFormat(lang, { weekday: 'long', month: 'short', day: '2-digit' }).format(now);
+  const dateEl = document.querySelector('.hero-copy .eyebrow');
+  const titleEl = document.querySelector('.hero-copy h1');
+  if (dateEl) { dateEl.dataset.noI18n = 'true'; dateEl.textContent = dateLabel.replace(',', ' ·').toLocaleUpperCase(lang); }
+  const name = profile?.name?.trim()?.split(/\s+/)[0] || homeT('User');
+  if (titleEl) { titleEl.dataset.noI18n = 'true'; titleEl.innerHTML = `${homeT(currentGreetingKey(now))}<br><em>${name}.</em>`; }
+}
+function renderRhythmAccess(profile = readLocal('form-profile', null)) {
+  const hidden = !profile;
+  const title = document.getElementById('rhythm-section-title');
+  const grid = document.getElementById('rhythm-grid');
+  if (title) title.hidden = hidden;
+  if (grid) grid.hidden = hidden;
+}
 
-function todayWorkoutKey(date = new Date()) {
-  return `form-generated-workout-${localDateId(date)}`;
+let dailyGoals = readLocal('form-daily-goals', defaultGoals);
+let homeAccountMode = 'login';
+function setAccountMode(mode = 'login') {
+  homeAccountMode = mode === 'signup' ? 'signup' : 'login';
+  const form = document.getElementById('login-form');
+  if (form) form.dataset.accountMode = homeAccountMode;
+  renderHomeAccount(readLocal('form-profile', null));
 }
-function todayWorkoutGenerated() {
-  return Boolean(readLocal(todayWorkoutKey(), null));
+window.setAccountMode = setAccountMode;
+window.getAccountMode = () => homeAccountMode;
+const goalFields = { calories: document.getElementById('goal-calories'), protein: document.getElementById('goal-protein'), carbs: document.getElementById('goal-carbs'), fat: document.getElementById('goal-fat'), water: document.getElementById('goal-water') };
+function renderGoals() {
+  Object.entries(dailyGoals).forEach(([key, value]) => {
+    const label = document.getElementById(`${key}-goal-label`);
+    if (label) label.textContent = key === 'calories' ? Number(value).toLocaleString() : value;
+  });
+  document.querySelector('.ring').style.setProperty('--progress', Math.min(100, Math.round(1420 / dailyGoals.calories * 100)));
 }
-function markTodayWorkoutGenerated() {
-  writeLocal(todayWorkoutKey(), { generatedAt: Date.now(), place: trainingPlace, body: trainingBody, goal: trainingGoal });
-}
-function pulseGenerateWorkout() {
-  const button = document.getElementById('generate-workout');
-  if (!button) return;
-  button.classList.remove('needs-generation');
-  void button.offsetWidth;
-  button.classList.add('needs-generation');
-  button.focus({ preventScroll: true });
-}
-function setTrainPlanReadyState() {
-  const generated = todayWorkoutGenerated();
-  document.getElementById('plan')?.classList.toggle('workout-generated', generated);
-  document.getElementById('generate-workout')?.classList.toggle('is-ready', generated);
-}
-function requireTodayWorkoutGenerated() {
-  if (todayWorkoutGenerated()) return true;
-  pulseGenerateWorkout();
-  homeToast('Generate today\'s workout first.');
-  return false;
-}
-
-const exercises = {
-  gym: {
-    upper: ['Barbell Bench Press', 'Dumbbell Palm Rotational Bent Over Row', 'Seated Dumbbell Shoulder Press', 'Pull-Up / Chin-Up'],
-    lower: ['Barbell Back Squat', 'Dumbbell Deadlift', 'Lever Horizontal Leg Press', 'Treadmill Running'],
-    full: ['Barbell Back Squat', 'Barbell Bench Press', 'Dumbbell Palm Rotational Bent Over Row', 'Dumbbell Deadlift'],
-    core: ['Cable Kneeling Crunch', 'Hanging Straight Leg Raise', 'Lever Seated Crunch', 'Vertical Leg Raise', 'Bicycle Twisting Crunch']
-  },
-  home: {
-    upper: ['Push-Up', 'Close-Grip Push-Up', 'Incline Push-Up', 'Bench Dips'],
-    lower: ['Squat', 'Jump Step-Up', 'Donkey Calf Raise', 'Burpee'],
-    full: ['Burpee', 'Squat', 'Push-Up', 'Jumping Jack', 'V-Up'],
-    core: ['Side Plank', 'Lying Leg Raise', 'Sit-Up', 'V-Up', 'Twisting Crunch']
-  }
-};
-
-// Only pairs whose source page explicitly identifies the demonstrated movement.
-// Everything else is intentionally withheld instead of showing misleading footage.
-const verifiedExerciseVideos = {
-  'Dumbbell bench press': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Video%20showing%20how%20to%20perform%20the%20dumbbell%20bench%20press%20and%20the%20dumbbell%20incline%20bench%20press.webm','https://commons.wikimedia.org/wiki/File:Video_showing_how_to_perform_the_dumbbell_bench_press_and_the_dumbbell_incline_bench_press.webm','Wikimedia Commons'],
-  'Bent-over row': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Bent-over%20row%20-%20exercise%20demonstration%20video.webm','https://commons.wikimedia.org/wiki/File:Bent-over_row_-_exercise_demonstration_video.webm','Wikimedia Commons'],
-  'Shoulder press': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Shoulder%20press%20-%20exercise%20demonstration%20video.webm','https://commons.wikimedia.org/wiki/File:Shoulder_press_-_exercise_demonstration_video.webm','Wikimedia Commons'],
-  'Pull-ups': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Pull-ups%20-%20exercise%20demonstration%20video.webm','https://commons.wikimedia.org/wiki/File:Pull-ups_-_exercise_demonstration_video.webm','Wikimedia Commons'],
-  'Deadlift': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Deadlift%20-%20exercise%20demonstration%20video.webm','https://commons.wikimedia.org/wiki/File:Deadlift_-_exercise_demonstration_video.webm','Wikimedia Commons'],
-  'Leg press': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Hip%20Sled%20-%20How%20to%20perform%20a%2045%20degree%20leg%20press.webm','https://commons.wikimedia.org/wiki/File:Hip_Sled_-_How_to_perform_a_45_degree_leg_press.webm','Wikimedia Commons'],
-  'Hanging crunches': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Hanging%20crunches%20-%20exercise%20demonstration%20video.webm','https://commons.wikimedia.org/wiki/File:Hanging_crunches_-_exercise_demonstration_video.webm','Wikimedia Commons'],
-  'Leg raises': ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Leg%20raises%20-%20exercise%20demonstration%20video.webm','https://commons.wikimedia.org/wiki/File:Leg_raises_-_exercise_demonstration_video.webm','Wikimedia Commons'],
-  'Gym push-up': ['https://videos.pexels.com/video-files/4742661/4742661-hd_1920_1080_25fps.mp4','https://www.pexels.com/video/man-doing-a-push-up-at-the-gym-4742661/'],
-  'Kettlebell push-up': ['https://videos.pexels.com/video-files/4812839/4812839-hd_1920_1080_25fps.mp4','https://www.pexels.com/video/video-of-man-doing-push-ups-exercises-4812839/'],
-  'Barbell back squat': ['https://videos.pexels.com/video-files/5319755/5319755-hd_1920_1080_25fps.mp4','https://www.pexels.com/video/man-doing-barbell-squats-5319755/'],
-  'Bodyweight squat': ['https://videos.pexels.com/video-files/6326764/6326764-hd_1920_1080_25fps.mp4','https://www.pexels.com/video/man-doing-squats-6326764/'],
-  'Barbell warm-up squat': ['https://videos.pexels.com/video-files/6114481/6114481-hd_1920_1080_25fps.mp4','https://www.pexels.com/video/man-shoulder-squats-with-an-empty-barbell-6114481/'],
-  'Treadmill finisher': ['https://videos.pexels.com/video-files/4065567/4065567-hd_1920_1080_30fps.mp4','https://www.pexels.com/video/a-person-running-using-the-treadmill-4065567/'],
-  'Slow push-up hold': ['https://videos.pexels.com/video-files/6389834/6389834-hd_1920_1080_25fps.mp4','https://www.pexels.com/video/man-doing-push-ups-6389834/'],
-  'Home push-up': ['https://videos.pexels.com/video-files/4367576/4367576-hd_1920_1080_30fps.mp4','https://www.pexels.com/video/a-man-doing-push-ups-4367576/']
-};
-
-const openExerciseDbSource = 'https://github.com/amiinwani/free-exercise-db-with-videos';
-Object.assign(verifiedExerciseVideos, {
-  'Barbell Bench Press':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/barbell-bench-press.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Dumbbell Palm Rotational Bent Over Row':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/dumbbell-palm-rotational-bent-over-row.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Seated Dumbbell Shoulder Press':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/dumbbell-bench-seated-press.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Pull-Up / Chin-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/chin-ups-pull-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Barbell Back Squat':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/classic-barbell-squat.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Dumbbell Deadlift':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/dumbbell-deadlift.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Lever Horizontal Leg Press':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/lever-horizontal-leg-press.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Treadmill Running':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/treadmill-running.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Cable Kneeling Crunch':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/cable-kneeling-crunch.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Hanging Straight Leg Raise':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/hanging-straight-leg-raise.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Lever Seated Crunch':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/lever-seated-crunch-1.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Vertical Leg Raise':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/vertical-leg-raise-on-parallel-bars.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Bicycle Twisting Crunch':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/45-degree-bycicle-twisting-crunch.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Push-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/push-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Close-Grip Push-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/close-grip-push-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Incline Push-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/incline-push-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Bench Dips':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/bench-dips.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Squat':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/squat.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Jump Step-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/jump-step-up.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Donkey Calf Raise':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/donkey-calf-raise.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Burpee':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/burpee.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Jumping Jack':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/jumping-jack.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Side Plank':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/side-bridge-side-plank.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Lying Leg Raise':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/lying-floor-leg-raise.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Sit-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/sit-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'V-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/v-up.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Twisting Crunch':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/twisting-crunch.mp4',openExerciseDbSource,'Free Exercise DB · MIT']
+renderGoals();
+document.querySelector('[data-open="goals"]').addEventListener('click', () => Object.entries(goalFields).forEach(([key, field]) => field.value = dailyGoals[key]));
+document.getElementById('goals-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const next = Object.fromEntries(Object.entries(goalFields).map(([key, field]) => [key, Number(field.value)]));
+  if (next.calories < 800 || next.protein < 20 || next.carbs < 20 || next.fat < 10 || next.water < .5) { homeToast('Please check your goal values.'); return; }
+  dailyGoals = next; writeLocal('form-daily-goals', dailyGoals); renderGoals(); window.dispatchEvent(new CustomEvent('goalsUpdated', { detail: dailyGoals }));
+  document.getElementById('goals').classList.remove('open'); homeToast('Daily goals saved.');
 });
 
-function setGoal(goal) {
-  trainingGoal = goal; writeLocal('form-training-goal', goal);
-  document.querySelectorAll('.goal-switch button').forEach(button => button.classList.toggle('selected', button.dataset.goal === goal));
-  const copy = programCopy[goal];
-  document.querySelector('.week-hero h2').innerHTML = copy.title;
-  document.querySelector('.week-hero p').textContent = copy.subtitle;
-  document.getElementById('profile-goal').textContent = copy.label;
-}
-document.querySelectorAll('.goal-switch button').forEach(button => button.addEventListener('click', () => setGoal(button.dataset.goal)));
-setGoal(trainingGoal);
-
-function bindSingleChoice(selector, setter) {
-  document.querySelectorAll(`${selector} button`).forEach(button => button.addEventListener('click', () => {
-    document.querySelectorAll(`${selector} button`).forEach(item => item.classList.remove('selected'));
-    button.classList.add('selected'); setter(button.dataset.value);
-  }));
-}
-bindSingleChoice('.location-choice', value => trainingPlace = value);
-bindSingleChoice('.body-choice', value => trainingBody = value);
-
-function bindSessionVideoButtons(scope = document) {
-  scope.querySelectorAll('#session-list [data-exercise-name]').forEach((button, index) => {
-    if (button.dataset.videoBound) return;
-    button.dataset.videoBound = 'true';
-    button.addEventListener('click', event => {
-      event.preventDefault();
-      if (!requireTodayWorkoutGenerated()) return;
-      openExercise(button.dataset.exerciseName, index, scope.querySelectorAll('#session-list [data-exercise-name]').length);
-    });
-  });
-}
-
-function openExercise(name, index, total, options = {}) {
-  if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
-  const exercisePlace = options.place || trainingPlace;
-  const home = exercisePlace === 'home';
-  document.getElementById('exercise-position').textContent = `EXERCISE ${index + 1} OF ${total}`;
-  document.getElementById('exercise-title').innerHTML = name.replace(' ', '<br>');
-  document.getElementById('exercise-cue').textContent = home
-    ? 'Move with control and stop the set when your form begins to change. Use a stable surface and clear the space around you.'
-    : 'Choose a load that leaves two good repetitions in reserve. Keep the movement controlled through the full range.';
-  document.getElementById('exercise-sets').textContent = trainingGoal === 'lose' ? '01 / 03' : '01 / 04';
-  document.getElementById('exercise-reps').textContent = trainingGoal === 'muscle' ? '8–12' : trainingGoal === 'gain' ? '10–15' : '12–15';
-  document.getElementById('exercise-rest').textContent = trainingGoal === 'lose' ? '45s' : '75s';
-  const media = verifiedExerciseVideos[name];
-  const player = document.getElementById('exercise-video');
-  const unavailable = document.getElementById('video-unavailable');
-  const credit = document.querySelector('.video-credit');
-  player.pause();
-  if (media) {
-    player.src = media[0]; player.muted = true; player.load(); player.style.display = 'block'; unavailable.classList.remove('show');
-    credit.href = media[1]; credit.textContent = `Verified source for ${name} · ${media[2] || 'Pexels'} ↗`; credit.style.display = 'block';
-  } else {
-    player.removeAttribute('src'); player.load(); player.style.display = 'none'; unavailable.classList.add('show'); credit.style.display = 'none';
-  }
-  const sheet = document.getElementById('workout'); sheet.classList.add('open'); sheet.setAttribute('aria-hidden', 'false');
-  const workoutContent = sheet.querySelector('.sheet-content'); if (workoutContent) workoutContent.scrollTop = 0;
-  setTimeout(() => document.activeElement?.blur?.(), 80);
-  if (media) player.play().catch(() => {});
-  window.dispatchEvent(new CustomEvent('exerciseOpened',{detail:{name,index,total,place:exercisePlace,goal:trainingGoal,body:trainingBody}}));
-}
-
-document.getElementById('exercise-video')?.addEventListener('touchstart', () => document.activeElement?.blur?.(), { passive:true });
-document.querySelector('.video-stage')?.addEventListener('pointerdown', () => document.activeElement?.blur?.());
-bindSessionVideoButtons();
-
-document.getElementById('generate-workout').addEventListener('click', () => {
-  markTodayWorkoutGenerated();
-  setTrainPlanReadyState();
-  const list = exercises[trainingPlace][trainingBody];
-  const placeLabel = trainingPlace === 'gym' ? 'GYM' : 'HOME';
-  const bodyLabel = document.querySelector('.body-choice .selected').textContent;
-  document.querySelector('#plan .section-title span').textContent = `${placeLabel} · ${bodyLabel.toUpperCase()}`;
-  document.querySelector('#plan .section-title h2').textContent = 'Today’s generated session';
-  const container = document.getElementById('session-list'); container.innerHTML = '';
-  list.forEach((name, index) => {
-    const button = document.createElement('button'); button.className = 'session generated';
-    button.dataset.exerciseName = name;
-    button.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span><div><small>${placeLabel} · ${programCopy[trainingGoal].label.toUpperCase()}</small><h3>${name}</h3><p>${trainingGoal === 'lose' ? '3' : '4'} sets · form video included</p></div><b>▶</b>`;
-    const playIcon = button.querySelector('b'); playIcon.textContent = ''; playIcon.className = 'session-play'; playIcon.setAttribute('aria-hidden','true');
-    const completedToday = readLocal('form-exercise-completions',[]).some(item => item.exercise === name && isToday(item.date));
-    if (completedToday) { button.classList.add('done'); button.querySelector('small').textContent = 'COMPLETED TODAY'; button.querySelector('b').textContent = '✓'; }
-    button.addEventListener('click', () => { if (requireTodayWorkoutGenerated()) openExercise(button.dataset.exerciseName, index, list.length); }); container.appendChild(button);
-  });
-  container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  homeToast('Your workout is ready.');
+document.getElementById('mark-read').addEventListener('click', () => {
+  document.querySelectorAll('.notification.unread').forEach(item => item.classList.remove('unread'));
+  document.querySelector('.topbar .icon-button i').style.display = 'none';
+  writeLocal('form-notifications-read', true); homeToast('All caught up.');
 });
-
-setTrainPlanReadyState();
-window.addEventListener('appDateChanged', setTrainPlanReadyState);
-window.addEventListener('focus', setTrainPlanReadyState);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) setTrainPlanReadyState(); });
-
-window.addEventListener('exerciseCompleted',event => {
-  document.querySelectorAll('#session-list [data-exercise-name]').forEach(button => {
-    if (button.dataset.exerciseName === event.detail.name) {
-      button.classList.add('done'); button.querySelector('small').textContent = 'COMPLETED TODAY'; button.querySelector('b').textContent = '✓';
-    }
-  });
-});
-
-function renderTrainProfile() {
-  const profile = readLocal('form-profile', null);
-  const name = profile?.name || 'Guest profile';
-  const email = profile?.email || 'Log in from the Today tab';
-  const initials = profile ? profile.name.split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase() : 'GU';
-  document.getElementById('profile-name').textContent = name;
-  document.getElementById('profile-email').textContent = email;
-  document.getElementById('profile-badge').textContent = initials;
-  document.querySelectorAll('.profile-trigger').forEach(avatar => {
-    avatar.textContent = profile ? initials : 'SK';
-    avatar.classList.toggle('logged-in', Boolean(profile));
-  });
-  const logout = document.getElementById('logout-button'); logout.textContent = profile ? 'Log out' : 'Go to login';
+if (readLocal('form-notifications-read', false)) {
+  document.querySelectorAll('.notification.unread').forEach(item => item.classList.remove('unread'));
+  document.querySelector('.topbar .icon-button i').style.display = 'none';
 }
-renderTrainProfile();
-document.querySelector('[data-open="train-profile"]')?.addEventListener('click', renderTrainProfile);
-document.getElementById('logout-button').addEventListener('click', () => {
-  const profile = readLocal('form-profile', null);
+
+function renderProfile(profile) {
   if (!profile) {
-    document.getElementById('train-profile').classList.remove('open');
-    navigate('home'); document.getElementById('login').classList.add('open'); return;
+    document.querySelectorAll('.profile-trigger').forEach(avatar => {
+      avatar.textContent = 'SK';
+      avatar.classList.remove('logged-in');
+    });
+    renderHomeHero(null);
+    renderRhythmAccess(null);
+    renderHomeAccount(null);
+    return;
   }
-  localStorage.removeItem('form-profile');
-  document.querySelector('.topbar .avatar').textContent = 'SK';
-  document.querySelector('.topbar .avatar').classList.remove('logged-in');
-  document.querySelector('.hero-copy h1').innerHTML = 'Good morning,<br><em>Senan.</em>';
-  renderTrainProfile(); document.getElementById('train-profile').classList.remove('open'); homeToast('You’re logged out.');
+  const initials = getInitials(profile.name);
+  document.querySelectorAll('.profile-trigger').forEach(avatar => {
+    avatar.textContent = initials;
+    avatar.classList.add('logged-in');
+  });
+  renderHomeHero(profile);
+  renderRhythmAccess(profile);
+  renderHomeAccount(profile);
+}
+function getInitials(name = '') {
+  return name.split(/\s+/).filter(Boolean).map(part => part[0]).slice(0, 2).join('').toUpperCase() || 'ME';
+}
+function accountSyncLabel() {
+  return window.formSupabase ? 'Cloud sync' : 'This device';
+}
+function renderHomeAccount(profile = readLocal('form-profile', null)) {
+  const title = document.getElementById('account-title');
+  const subtitle = document.getElementById('account-subtitle');
+  const form = document.getElementById('login-form');
+  const panel = document.getElementById('login-success');
+  if (!title || !subtitle || !form || !panel) return;
+  if (!profile) {
+    const creating = homeAccountMode === 'signup';
+    form.dataset.accountMode = homeAccountMode;
+    title.innerHTML = creating ? 'Create<br><em>account.</em>' : 'Welcome<br><em>back.</em>';
+    subtitle.textContent = creating ? 'Save your setup and keep progress synced.' : 'Log in to keep your goals and progress synced.';
+    form.querySelector('button[type="submit"]').textContent = creating ? 'Create account' : 'Log in';
+    form.querySelector('[data-action="create-account"]').textContent = creating ? 'Already have an account? Log in' : 'Create an account';
+    form.style.display = 'grid';
+    panel.classList.remove('show');
+    return;
+  }
+  homeAccountMode = 'login';
+  title.innerHTML = 'Your<br><em>profile.</em>';
+  subtitle.textContent = 'Manage your account, goals, and setup from here.';
+  form.style.display = 'none';
+  panel.classList.add('show');
+  document.getElementById('home-profile-badge').textContent = getInitials(profile.name);
+  document.getElementById('home-profile-name').textContent = profile.name || 'Your profile';
+  document.getElementById('home-profile-email').textContent = profile.email || 'Local profile';
+  document.getElementById('home-profile-goal').textContent = (typeof programCopy !== 'undefined' ? programCopy[readLocal('form-training-goal','muscle')]?.label : null) || 'Build muscle';
+  document.getElementById('home-profile-calories').textContent = `${Number(dailyGoals.calories).toLocaleString()} kcal`;
+  document.getElementById('home-profile-sync').textContent = accountSyncLabel();
+}
+renderProfile(readLocal('form-profile', null));
+setInterval(() => { refreshAppDateTime(); renderHomeHero(readLocal('form-profile', null)); }, 60000);
+window.addEventListener('focus', () => { refreshAppDateTime(); renderHomeHero(readLocal('form-profile', null)); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { refreshAppDateTime(); renderHomeHero(readLocal('form-profile', null)); } });
+window.addEventListener('languageChanged', () => {
+  renderHomeHero(readLocal('form-profile', null));
+  renderHomeAccount(readLocal('form-profile', null));
 });
+document.getElementById('login-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const profile = { name: document.getElementById('login-name').value.trim(), email: document.getElementById('login-email').value.trim() };
+  writeLocal('form-profile', profile); renderProfile(profile);
+  homeToast('Profile ready.');
+});
+document.querySelectorAll('[data-open="login"]').forEach(button => button.addEventListener('click', () => {
+  renderHomeAccount(readLocal('form-profile', null));
+}));
+document.querySelector('[data-action="create-account"]').addEventListener('click', () => {
+  setAccountMode(homeAccountMode === 'signup' ? 'login' : 'signup');
+});
+document.getElementById('home-edit-goals')?.addEventListener('click', () => {
+  document.getElementById('login').classList.remove('open');
+  document.querySelector('[data-open="goals"]').click();
+});
+document.getElementById('home-edit-setup')?.addEventListener('click', () => {
+  document.getElementById('login').classList.remove('open');
+  if (typeof openOnboarding === 'function') openOnboarding(true);
+  else {
+    document.getElementById('onboarding').classList.add('open');
+    document.getElementById('onboarding').setAttribute('aria-hidden','false');
+  }
+});
+document.getElementById('home-logout-button')?.addEventListener('click', async () => {
+  if (window.formCloudSignOut) await window.formCloudSignOut();
+  localStorage.removeItem('form-profile');
+  renderProfile(null);
+  if (typeof renderTrainProfile === 'function') renderTrainProfile();
+  document.getElementById('login').classList.remove('open');
+  homeToast('You’re logged out.');
+});
+window.addEventListener('goalsUpdated', () => renderHomeAccount());
