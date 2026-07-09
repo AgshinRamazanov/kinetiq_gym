@@ -32,6 +32,8 @@ let dailyGoals = readLocal('form-daily-goals', defaultGoals);
 let homeAccountMode = 'login';
 function setAccountMode(mode = 'login') {
   homeAccountMode = mode === 'signup' ? 'signup' : 'login';
+  const form = document.getElementById('login-form');
+  if (form) form.dataset.accountMode = homeAccountMode;
   renderHomeAccount(readLocal('form-profile', null));
 }
 window.setAccountMode = setAccountMode;
@@ -96,6 +98,7 @@ function renderHomeAccount(profile = readLocal('form-profile', null)) {
   if (!title || !subtitle || !form || !panel) return;
   if (!profile) {
     const creating = homeAccountMode === 'signup';
+    form.dataset.accountMode = homeAccountMode;
     title.innerHTML = creating ? 'Create<br><em>account.</em>' : 'Welcome<br><em>back.</em>';
     subtitle.textContent = creating ? 'Save your setup and keep progress synced.' : 'Log in to keep your goals and progress synced.';
     form.querySelector('button[type="submit"]').textContent = creating ? 'Create account' : 'Log in';

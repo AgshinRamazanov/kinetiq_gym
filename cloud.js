@@ -6,6 +6,7 @@ const status=document.createElement('p');status.className='cloud-status';loginFo
 let accountMode=window.getAccountMode?.()||'login',supabase=null,currentUser=null,syncTimer=null,hydrating=false;
 function setCloudAccountMode(mode='login'){
   accountMode=mode==='signup'?'signup':'login';
+  loginForm.dataset.accountMode=accountMode;
   loginButton.textContent=accountMode==='signup'?'Create account':'Log in';
   createButton.textContent=accountMode==='signup'?'Already have an account? Log in':'Create an account';
   setStatus(accountMode==='signup'?'Create a secure account to synchronize your data.':'Welcome back.');
@@ -48,6 +49,8 @@ createButton.addEventListener('click',event=>{
 loginForm.addEventListener('submit',async event=>{
   if(!configured())return;
   event.preventDefault();event.stopImmediatePropagation();
+  const mode=loginForm.dataset.accountMode||accountMode;
+  accountMode=mode==='signup'?'signup':'login';
   const name=document.getElementById('login-name').value.trim(),email=document.getElementById('login-email').value.trim(),password=document.getElementById('login-password').value;
   loginButton.disabled=true;loginButton.textContent=accountMode==='signup'?'Creating account…':'Logging in…';
   try{
@@ -57,7 +60,11 @@ loginForm.addEventListener('submit',async event=>{
     if(!response.data.session){setStatus('Check your email to confirm the account.','online');return}
     const profile={name:name||response.data.user.user_metadata?.name||email.split('@')[0],email};localStorage.setItem('form-profile',JSON.stringify(profile));
     await hydrateOrMigrate();renderProfile(profile);if(typeof renderHomeAccount==='function')renderHomeAccount(profile);
-  }catch(error){setStatus(error.message||'Authentication failed.','error')}
+  }catch(error){
+    const message=String(error.message||'Authentication failed.');
+    if(accountMode==='login'&&/invalid login credentials/i.test(message))setStatus('No account matched that email and password. Tap Create an account first if you are new.','error');
+    else setStatus(message,'error');
+  }
   finally{loginButton.disabled=false;loginButton.textContent=accountMode==='signup'?'Create account':'Log in'}
 },true);
 
