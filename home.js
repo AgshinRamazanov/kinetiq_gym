@@ -47,6 +47,30 @@ function renderRhythmAccess(profile = readLocal('form-profile', null)) {
   if (title) title.hidden = hidden;
   if (grid) grid.hidden = hidden;
 }
+function trainingCompletionDateId(value) {
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? localDateId(date) : null;
+}
+function calculateTrainingStreak(completions = readLocal('form-exercise-completions', []), date = new Date()) {
+  const entries = Array.isArray(completions) ? completions : [];
+  const completionDays = new Set(entries.map(item => trainingCompletionDateId(item.date)).filter(Boolean));
+  let cursor = new Date(date);
+  cursor.setHours(12, 0, 0, 0);
+  if (!completionDays.has(localDateId(cursor))) cursor.setDate(cursor.getDate() - 1);
+  let streak = 0;
+  while (completionDays.has(localDateId(cursor))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+function renderTrainingStreak() {
+  const streak = calculateTrainingStreak();
+  const value = document.getElementById('training-streak');
+  const label = document.getElementById('training-streak-label');
+  if (value) value.textContent = String(streak);
+  if (label) label.textContent = streak === 1 ? 'day' : 'days';
+}
 
 let dailyGoals = readLocal('form-daily-goals', defaultGoals);
 let homeAccountMode = 'login';
@@ -67,6 +91,7 @@ function renderGoals() {
   document.querySelector('.ring').style.setProperty('--progress', Math.min(100, Math.round(1420 / dailyGoals.calories * 100)));
 }
 renderGoals();
+renderTrainingStreak();
 document.querySelector('[data-open="goals"]').addEventListener('click', () => Object.entries(goalFields).forEach(([key, field]) => field.value = dailyGoals[key]));
 document.getElementById('goals-form').addEventListener('submit', event => {
   event.preventDefault();
@@ -182,3 +207,8 @@ document.getElementById('home-logout-button')?.addEventListener('click', async (
   homeToast('You’re logged out.');
 });
 window.addEventListener('goalsUpdated', () => renderHomeAccount());
+window.addEventListener('exerciseCompleted', renderTrainingStreak);
+window.addEventListener('appDateChanged', renderTrainingStreak);
+window.addEventListener('localDataChanged', event => {
+  if (event.detail?.key === 'form-exercise-completions') renderTrainingStreak();
+});

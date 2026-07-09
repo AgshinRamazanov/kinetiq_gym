@@ -116,6 +116,15 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("function renderRhythmAccess", home)
         self.assertIn("renderRhythmAccess(null)", home)
 
+    def test_today_streak_uses_saved_exercise_completions(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        home = (ROOT / "home.js").read_text(encoding="utf-8")
+        self.assertIn('id="training-streak">0</strong>', index)
+        self.assertNotIn("<strong>12</strong><small>days</small>", index)
+        self.assertIn("function calculateTrainingStreak", home)
+        self.assertIn("form-exercise-completions", home)
+        self.assertIn("window.addEventListener('exerciseCompleted', renderTrainingStreak)", home)
+
     def test_train_builder_styles_have_main_stylesheet_fallback(self):
         styles = (ROOT / "styles.css").read_text(encoding="utf-8")
         self.assertIn(".workout-builder{margin-top:15px", styles)
