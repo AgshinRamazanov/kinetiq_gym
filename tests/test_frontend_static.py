@@ -125,6 +125,15 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("form-exercise-completions", home)
         self.assertIn("window.addEventListener('exerciseCompleted', renderTrainingStreak)", home)
 
+    def test_dynamic_reminder_ui_translates(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        reminders = (ROOT / "reminders.js").read_text(encoding="utf-8")
+        self.assertIn("reminders.js?v=20260710-1", index)
+        self.assertIn("const reminderCopy", reminders)
+        self.assertIn("function renderReminderLanguage", reminders)
+        self.assertIn("window.addEventListener('languageChanged', renderReminderLanguage)", reminders)
+        self.assertIn("data-reminder-copy=\"configure\"", reminders)
+
     def test_train_builder_styles_have_main_stylesheet_fallback(self):
         styles = (ROOT / "styles.css").read_text(encoding="utf-8")
         self.assertIn(".workout-builder{margin-top:15px", styles)
