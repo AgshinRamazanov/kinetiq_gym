@@ -4,10 +4,18 @@
     {
       "source": "/api/scan-food",
       "destination": "/api/scan_food"
+    },
+    {
+      "source": "/api/exercise-video",
+      "destination": "/api/exercise_video"
     }
   ],
   "functions": {
     "api/scan_food.py": {
+      "maxDuration": 60,
+      "excludeFiles": "{tests/**,__pycache__/**,**/*.pyc,.git/**,.agents/**,.codex/**}"
+    },
+    "api/exercise_video.py": {
       "maxDuration": 60,
       "excludeFiles": "{tests/**,__pycache__/**,**/*.pyc,.git/**,.agents/**,.codex/**}"
     }
@@ -34,7 +42,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src https:; connect-src 'self' https://cdn.jsdelivr.net https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' https:; connect-src 'self' https://cdn.jsdelivr.net https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         }
       ]
     }

@@ -134,6 +134,18 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("class handler(BaseHTTPRequestHandler)", api_source)
         self.assertIn("handle_scan_request", api_source)
 
+    def test_exercise_videos_are_proxied_through_app(self):
+        train = (ROOT / "train.js").read_text(encoding="utf-8")
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        config = json.loads((ROOT / "vercel.json").read_text(encoding="utf-8"))
+
+        self.assertIn("/api/exercise-video?file=", train)
+        self.assertNotIn("github.com/amiinwani/free-exercise-db-with-videos", train)
+        self.assertNotIn("Verified source", index)
+        self.assertIn({"source": "/api/exercise-video", "destination": "/api/exercise_video"}, config["rewrites"])
+        self.assertIn("api/exercise_video.py", config["functions"])
+        self.assertIn("media-src 'self' https:", json.dumps(config))
+
     def test_text_files_do_not_contain_common_mojibake(self):
         offenders = []
         for path in ROOT.rglob("*"):

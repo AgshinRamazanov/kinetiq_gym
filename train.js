@@ -73,8 +73,7 @@ const verifiedExerciseVideos = {
 };
 
 
-const exerciseDbVideoBase = 'https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/';
-const exerciseDbVideo = file => `${exerciseDbVideoBase}${file}`;
+const exerciseDbVideo = file => `/api/exercise-video?file=${encodeURIComponent(file)}`;
 Object.assign(verifiedExerciseVideos, {
   'Barbell Bench Press':[exerciseDbVideo('barbell-bench-press.mp4')],
   'Dumbbell Palm Rotational Bent Over Row':[exerciseDbVideo('dumbbell-palm-rotational-bent-over-row.mp4')],
