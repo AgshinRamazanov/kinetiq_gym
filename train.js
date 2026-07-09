@@ -7,6 +7,35 @@ let trainingGoal = readLocal('form-training-goal', 'muscle');
 let trainingPlace = 'gym';
 let trainingBody = 'upper';
 
+function todayWorkoutKey(date = new Date()) {
+  return `form-generated-workout-${localDateId(date)}`;
+}
+function todayWorkoutGenerated() {
+  return Boolean(readLocal(todayWorkoutKey(), null));
+}
+function markTodayWorkoutGenerated() {
+  writeLocal(todayWorkoutKey(), { generatedAt: Date.now(), place: trainingPlace, body: trainingBody, goal: trainingGoal });
+}
+function pulseGenerateWorkout() {
+  const button = document.getElementById('generate-workout');
+  if (!button) return;
+  button.classList.remove('needs-generation');
+  void button.offsetWidth;
+  button.classList.add('needs-generation');
+  button.focus({ preventScroll: true });
+}
+function setTrainPlanReadyState() {
+  const generated = todayWorkoutGenerated();
+  document.getElementById('plan')?.classList.toggle('workout-generated', generated);
+  document.getElementById('generate-workout')?.classList.toggle('is-ready', generated);
+}
+function requireTodayWorkoutGenerated() {
+  if (todayWorkoutGenerated()) return true;
+  pulseGenerateWorkout();
+  homeToast('Generate today\'s workout first.');
+  return false;
+}
+
 const exercises = {
   gym: {
     upper: ['Barbell Bench Press', 'Dumbbell Palm Rotational Bent Over Row', 'Seated Dumbbell Shoulder Press', 'Pull-Up / Chin-Up'],
@@ -100,6 +129,7 @@ function bindSessionVideoButtons(scope = document) {
     button.dataset.videoBound = 'true';
     button.addEventListener('click', event => {
       event.preventDefault();
+      if (!requireTodayWorkoutGenerated()) return;
       openExercise(button.dataset.exerciseName, index, scope.querySelectorAll('#session-list [data-exercise-name]').length);
     });
   });
@@ -140,6 +170,8 @@ document.querySelector('.video-stage')?.addEventListener('pointerdown', () => do
 bindSessionVideoButtons();
 
 document.getElementById('generate-workout').addEventListener('click', () => {
+  markTodayWorkoutGenerated();
+  setTrainPlanReadyState();
   const list = exercises[trainingPlace][trainingBody];
   const placeLabel = trainingPlace === 'gym' ? 'GYM' : 'HOME';
   const bodyLabel = document.querySelector('.body-choice .selected').textContent;
@@ -153,11 +185,16 @@ document.getElementById('generate-workout').addEventListener('click', () => {
     const playIcon = button.querySelector('b'); playIcon.textContent = ''; playIcon.className = 'session-play'; playIcon.setAttribute('aria-hidden','true');
     const completedToday = readLocal('form-exercise-completions',[]).some(item => item.exercise === name && isToday(item.date));
     if (completedToday) { button.classList.add('done'); button.querySelector('small').textContent = 'COMPLETED TODAY'; button.querySelector('b').textContent = '✓'; }
-    button.addEventListener('click', () => openExercise(button.dataset.exerciseName, index, list.length)); container.appendChild(button);
+    button.addEventListener('click', () => { if (requireTodayWorkoutGenerated()) openExercise(button.dataset.exerciseName, index, list.length); }); container.appendChild(button);
   });
   container.scrollIntoView({ behavior: 'smooth', block: 'start' });
   homeToast('Your workout is ready.');
 });
+
+setTrainPlanReadyState();
+window.addEventListener('appDateChanged', setTrainPlanReadyState);
+window.addEventListener('focus', setTrainPlanReadyState);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) setTrainPlanReadyState(); });
 
 window.addEventListener('exerciseCompleted',event => {
   document.querySelectorAll('#session-list [data-exercise-name]').forEach(button => {
