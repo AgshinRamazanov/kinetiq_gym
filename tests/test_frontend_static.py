@@ -52,6 +52,7 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertEqual("manifest.webmanifest", parser.manifest)
         self.assertIn("pwa.js?v=20260709-5", parser.assets)
         self.assertIn("i18n.js?v=20260709-5", parser.assets)
+        self.assertIn("styles.css?v=20260709-7", parser.assets)
         self.assertIn("train.css?v=20260709-6", parser.assets)
 
         manifest = json.loads((ROOT / "manifest.webmanifest").read_text(encoding="utf-8"))
@@ -68,7 +69,7 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("./pwa.js", service_worker)
         self.assertIn("./i18n.js", service_worker)
         self.assertIn("request.mode === 'navigate'", service_worker)
-        self.assertIn("kinetiq-shell-v20260709-6", service_worker)
+        self.assertIn("kinetiq-shell-v20260709-7", service_worker)
 
     def test_language_selector_and_dictionaries_exist(self):
         index = (ROOT / "index.html").read_text(encoding="utf-8")
@@ -114,6 +115,12 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn('id="rhythm-grid" hidden', index)
         self.assertIn("function renderRhythmAccess", home)
         self.assertIn("renderRhythmAccess(null)", home)
+
+    def test_train_builder_styles_have_main_stylesheet_fallback(self):
+        styles = (ROOT / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".workout-builder{margin-top:15px", styles)
+        self.assertIn(".choice-row,.body-choice{display:grid", styles)
+        self.assertIn(".generate-button{width:100%", styles)
 
     def test_vercel_scanner_route_is_configured(self):
         config = json.loads((ROOT / "vercel.json").read_text(encoding="utf-8"))
