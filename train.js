@@ -1,4 +1,4 @@
-const programCopy = {
+﻿const programCopy = {
   muscle: { title: 'Forge<br>Foundation', subtitle: 'Progressive strength · 4 days/week', label: 'Build muscle' },
   lose: { title: 'Lean<br>Momentum', subtitle: 'Strength circuits · 5 days/week', label: 'Lose fat' },
   gain: { title: 'Mass<br>Method', subtitle: 'Hypertrophy & recovery · 4 days/week', label: 'Gain weight' }
@@ -72,35 +72,37 @@ const verifiedExerciseVideos = {
   'Home push-up': ['https://videos.pexels.com/video-files/4367576/4367576-hd_1920_1080_30fps.mp4','https://www.pexels.com/video/a-man-doing-push-ups-4367576/']
 };
 
-const openExerciseDbSource = 'https://github.com/amiinwani/free-exercise-db-with-videos';
+
+const exerciseDbVideoBase = 'https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/';
+const exerciseDbVideo = file => `${exerciseDbVideoBase}${file}`;
 Object.assign(verifiedExerciseVideos, {
-  'Barbell Bench Press':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/barbell-bench-press.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Dumbbell Palm Rotational Bent Over Row':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/dumbbell-palm-rotational-bent-over-row.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Seated Dumbbell Shoulder Press':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/dumbbell-bench-seated-press.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Pull-Up / Chin-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/chin-ups-pull-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Barbell Back Squat':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/classic-barbell-squat.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Dumbbell Deadlift':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/dumbbell-deadlift.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Lever Horizontal Leg Press':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/lever-horizontal-leg-press.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Treadmill Running':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/treadmill-running.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Cable Kneeling Crunch':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/cable-kneeling-crunch.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Hanging Straight Leg Raise':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/hanging-straight-leg-raise.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Lever Seated Crunch':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/lever-seated-crunch-1.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Vertical Leg Raise':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/vertical-leg-raise-on-parallel-bars.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Bicycle Twisting Crunch':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/45-degree-bycicle-twisting-crunch.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Push-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/push-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Close-Grip Push-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/close-grip-push-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Incline Push-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/incline-push-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Bench Dips':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/bench-dips.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Squat':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/squat.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Jump Step-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/jump-step-up.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Donkey Calf Raise':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/donkey-calf-raise.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Burpee':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/burpee.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Jumping Jack':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/jumping-jack.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Side Plank':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/side-bridge-side-plank.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Lying Leg Raise':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/lying-floor-leg-raise.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Sit-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/sit-ups.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'V-Up':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/v-up.mp4',openExerciseDbSource,'Free Exercise DB · MIT'],
-  'Twisting Crunch':['https://pub-585d42eb1aa64a67aedf483ec328d3fe.r2.dev/exercise-videos/male/twisting-crunch.mp4',openExerciseDbSource,'Free Exercise DB · MIT']
+  'Barbell Bench Press':[exerciseDbVideo('barbell-bench-press.mp4')],
+  'Dumbbell Palm Rotational Bent Over Row':[exerciseDbVideo('dumbbell-palm-rotational-bent-over-row.mp4')],
+  'Seated Dumbbell Shoulder Press':[exerciseDbVideo('dumbbell-bench-seated-press.mp4')],
+  'Pull-Up / Chin-Up':[exerciseDbVideo('chin-ups-pull-ups.mp4')],
+  'Barbell Back Squat':[exerciseDbVideo('classic-barbell-squat.mp4')],
+  'Dumbbell Deadlift':[exerciseDbVideo('dumbbell-deadlift.mp4')],
+  'Lever Horizontal Leg Press':[exerciseDbVideo('lever-horizontal-leg-press.mp4')],
+  'Treadmill Running':[exerciseDbVideo('treadmill-running.mp4')],
+  'Cable Kneeling Crunch':[exerciseDbVideo('cable-kneeling-crunch.mp4')],
+  'Hanging Straight Leg Raise':[exerciseDbVideo('hanging-straight-leg-raise.mp4')],
+  'Lever Seated Crunch':[exerciseDbVideo('lever-seated-crunch-1.mp4')],
+  'Vertical Leg Raise':[exerciseDbVideo('vertical-leg-raise-on-parallel-bars.mp4')],
+  'Bicycle Twisting Crunch':[exerciseDbVideo('45-degree-bycicle-twisting-crunch.mp4')],
+  'Push-Up':[exerciseDbVideo('push-ups.mp4')],
+  'Close-Grip Push-Up':[exerciseDbVideo('close-grip-push-ups.mp4')],
+  'Incline Push-Up':[exerciseDbVideo('incline-push-ups.mp4')],
+  'Bench Dips':[exerciseDbVideo('bench-dips.mp4')],
+  'Squat':[exerciseDbVideo('squat.mp4')],
+  'Jump Step-Up':[exerciseDbVideo('jump-step-up.mp4')],
+  'Donkey Calf Raise':[exerciseDbVideo('donkey-calf-raise.mp4')],
+  'Burpee':[exerciseDbVideo('burpee.mp4')],
+  'Jumping Jack':[exerciseDbVideo('jumping-jack.mp4')],
+  'Side Plank':[exerciseDbVideo('side-bridge-side-plank.mp4')],
+  'Lying Leg Raise':[exerciseDbVideo('lying-floor-leg-raise.mp4')],
+  'Sit-Up':[exerciseDbVideo('sit-ups.mp4')],
+  'V-Up':[exerciseDbVideo('v-up.mp4')],
+  'Twisting Crunch':[exerciseDbVideo('twisting-crunch.mp4')]
 });
 
 function setGoal(goal) {
@@ -152,12 +154,16 @@ function openExercise(name, index, total, options = {}) {
   const unavailable = document.getElementById('video-unavailable');
   const credit = document.querySelector('.video-credit');
   player.pause();
+  player.onerror = () => {
+    player.removeAttribute('src'); player.load(); player.style.display = 'none'; unavailable.classList.add('show');
+  };
+  if (credit) credit.style.display = 'none';
   if (media) {
     player.src = media[0]; player.muted = true; player.load(); player.style.display = 'block'; unavailable.classList.remove('show');
-    credit.href = media[1]; credit.textContent = `Verified source for ${name} · ${media[2] || 'Pexels'} ↗`; credit.style.display = 'block';
   } else {
     player.removeAttribute('src'); player.load(); player.style.display = 'none'; unavailable.classList.add('show'); credit.style.display = 'none';
   }
+  if (credit) credit.style.display = 'none';
   const sheet = document.getElementById('workout'); sheet.classList.add('open'); sheet.setAttribute('aria-hidden', 'false');
   const workoutContent = sheet.querySelector('.sheet-content'); if (workoutContent) workoutContent.scrollTop = 0;
   setTimeout(() => document.activeElement?.blur?.(), 80);
@@ -235,3 +241,5 @@ document.getElementById('logout-button').addEventListener('click', () => {
   }
   renderTrainProfile(); document.getElementById('train-profile').classList.remove('open'); homeToast('You’re logged out.');
 });
+
+
