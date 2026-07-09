@@ -79,6 +79,15 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("'Good morning,': 'Доброе утро,'", i18n)
         self.assertIn("'Good morning,': 'Günaydın,'", i18n)
 
+    def test_default_training_sessions_open_real_videos(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertIn('data-exercise-name="Barbell Bench Press"', index)
+        self.assertNotIn('class="session today" data-open="workout"', index)
+
+        train = (ROOT / "train.js").read_text(encoding="utf-8")
+        self.assertIn("function bindSessionVideoButtons", train)
+        self.assertIn("openExercise(button.dataset.exerciseName", train)
+
     def test_vercel_scanner_route_is_configured(self):
         config = json.loads((ROOT / "vercel.json").read_text(encoding="utf-8"))
         self.assertIn({"source": "/api/scan-food", "destination": "/api/scan_food"}, config["rewrites"])

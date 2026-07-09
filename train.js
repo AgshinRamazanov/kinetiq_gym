@@ -94,6 +94,17 @@ function bindSingleChoice(selector, setter) {
 bindSingleChoice('.location-choice', value => trainingPlace = value);
 bindSingleChoice('.body-choice', value => trainingBody = value);
 
+function bindSessionVideoButtons(scope = document) {
+  scope.querySelectorAll('#session-list [data-exercise-name]').forEach((button, index) => {
+    if (button.dataset.videoBound) return;
+    button.dataset.videoBound = 'true';
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      openExercise(button.dataset.exerciseName, index, scope.querySelectorAll('#session-list [data-exercise-name]').length);
+    });
+  });
+}
+
 function openExercise(name, index, total, options = {}) {
   if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
   const exercisePlace = options.place || trainingPlace;
@@ -126,6 +137,7 @@ function openExercise(name, index, total, options = {}) {
 
 document.getElementById('exercise-video')?.addEventListener('touchstart', () => document.activeElement?.blur?.(), { passive:true });
 document.querySelector('.video-stage')?.addEventListener('pointerdown', () => document.activeElement?.blur?.());
+bindSessionVideoButtons();
 
 document.getElementById('generate-workout').addEventListener('click', () => {
   const list = exercises[trainingPlace][trainingBody];
