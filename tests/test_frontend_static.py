@@ -86,7 +86,7 @@ class FrontendStaticTests(unittest.TestCase):
         index = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn('data-exercise-name="Barbell Bench Press"', index)
         self.assertNotIn('class="session today" data-open="workout"', index)
-        self.assertIn("train.js?v=20260709-6", index)
+        self.assertIn("train.js?v=20260710-2", index)
 
         train = (ROOT / "train.js").read_text(encoding="utf-8")
         self.assertIn("function bindSessionVideoButtons", train)
@@ -124,6 +124,17 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("function calculateTrainingStreak", home)
         self.assertIn("form-exercise-completions", home)
         self.assertIn("window.addEventListener('exerciseCompleted', renderTrainingStreak)", home)
+
+    def test_new_users_start_training_program_from_beginning(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        train = (ROOT / "train.js").read_text(encoding="utf-8")
+        self.assertIn('id="home-program-position">WEEK 1 · DAY 1</span>', index)
+        self.assertIn('id="program-week-number">01</b>', index)
+        self.assertIn('id="profile-training-week">1 of 8</strong>', index)
+        self.assertIn('id="profile-workouts">0 completed</strong>', index)
+        self.assertNotIn("WEEK 3 · DAY 2", index)
+        self.assertIn("function currentProgramPosition", train)
+        self.assertIn("completedDays + 1", train)
 
     def test_dynamic_reminder_ui_translates(self):
         index = (ROOT / "index.html").read_text(encoding="utf-8")

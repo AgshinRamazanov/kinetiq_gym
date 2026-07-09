@@ -6,6 +6,8 @@
 let trainingGoal = readLocal('form-training-goal', 'muscle');
 let trainingPlace = 'gym';
 let trainingBody = 'upper';
+const sessionsPerWeek = 4;
+const totalProgramWeeks = 8;
 
 function todayWorkoutKey(date = new Date()) {
   return `form-generated-workout-${localDateId(date)}`;
@@ -34,6 +36,44 @@ function requireTodayWorkoutGenerated() {
   pulseGenerateWorkout();
   homeToast('Generate today\'s workout first.');
   return false;
+}
+function completedTrainingDays() {
+  const completions = readLocal('form-exercise-completions', []);
+  const items = Array.isArray(completions) ? completions : [];
+  return new Set(items.map(item => {
+    const date = new Date(item.date);
+    return Number.isFinite(date.getTime()) ? localDateId(date) : null;
+  }).filter(Boolean));
+}
+function currentProgramPosition() {
+  const completedDays = completedTrainingDays().size;
+  const maxSessions = sessionsPerWeek * totalProgramWeeks;
+  const nextSession = Math.min(completedDays + 1, maxSessions);
+  return {
+    week: Math.floor((nextSession - 1) / sessionsPerWeek) + 1,
+    day: ((nextSession - 1) % sessionsPerWeek) + 1,
+    completedDays
+  };
+}
+function renderTrainingProgress() {
+  const progress = currentProgramPosition();
+  const position = `WEEK ${progress.week} · DAY ${progress.day}`;
+  const homePosition = document.getElementById('home-program-position');
+  if (homePosition) homePosition.textContent = position;
+  const weekNumber = document.getElementById('program-week-number');
+  if (weekNumber) weekNumber.textContent = String(progress.week).padStart(2, '0');
+  const weekRow = document.getElementById('week-row');
+  if (weekRow) {
+    weekRow.querySelectorAll('button').forEach((button, index) => {
+      const week = index + 1;
+      button.classList.toggle('active', week === progress.week);
+      button.innerHTML = week < progress.week ? `${week}<small>✓</small>` : week === progress.week ? `${week}<small>NOW</small>` : `${week}`;
+    });
+  }
+  const profileWeek = document.getElementById('profile-training-week');
+  if (profileWeek) profileWeek.textContent = `${progress.week} of ${totalProgramWeeks}`;
+  const profileWorkouts = document.getElementById('profile-workouts');
+  if (profileWorkouts) profileWorkouts.textContent = `${progress.completedDays} completed`;
 }
 
 const exercises = {
@@ -197,6 +237,7 @@ document.getElementById('generate-workout').addEventListener('click', () => {
 });
 
 setTrainPlanReadyState();
+renderTrainingProgress();
 window.addEventListener('appDateChanged', setTrainPlanReadyState);
 window.addEventListener('focus', setTrainPlanReadyState);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) setTrainPlanReadyState(); });
@@ -207,6 +248,10 @@ window.addEventListener('exerciseCompleted',event => {
       button.classList.add('done'); button.querySelector('small').textContent = 'COMPLETED TODAY'; button.querySelector('b').textContent = '✓';
     }
   });
+  renderTrainingProgress();
+});
+window.addEventListener('localDataChanged', event => {
+  if (event.detail?.key === 'form-exercise-completions') renderTrainingProgress();
 });
 
 function renderTrainProfile() {
@@ -222,6 +267,7 @@ function renderTrainProfile() {
     avatar.classList.toggle('logged-in', Boolean(profile));
   });
   const logout = document.getElementById('logout-button'); logout.textContent = profile ? 'Log out' : 'Go to login';
+  renderTrainingProgress();
 }
 renderTrainProfile();
 document.querySelector('[data-open="train-profile"]')?.addEventListener('click', renderTrainProfile);
