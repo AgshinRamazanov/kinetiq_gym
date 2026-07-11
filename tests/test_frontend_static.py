@@ -70,6 +70,18 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("revision bigint", schema)
         self.assertIn("function public.delete_own_account", schema)
 
+    def test_production_legal_telemetry_and_authenticated_limits_are_wired(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        cloud = (ROOT / "cloud.js").read_text(encoding="utf-8")
+        scanner = (ROOT / "scanner.js").read_text(encoding="utf-8")
+        core = (ROOT / "scan_food_core.py").read_text(encoding="utf-8")
+        self.assertIn('src="legal.js"', index)
+        self.assertIn('src="telemetry.js"', index)
+        self.assertIn("terms_version", cloud)
+        self.assertIn("getCloudAccessToken", cloud)
+        self.assertIn("headers.Authorization", scanner)
+        self.assertIn('f"user:{user_id}"', core)
+
     def test_index_referenced_local_assets_exist(self):
         parser = AssetParser()
         parser.feed((ROOT / "index.html").read_text(encoding="utf-8"))

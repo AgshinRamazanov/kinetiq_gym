@@ -2,6 +2,7 @@ import json
 from http.server import BaseHTTPRequestHandler
 
 from scan_food_core import handle_scan_request
+from auth import authenticated_user_id
 
 
 class handler(BaseHTTPRequestHandler):
@@ -19,7 +20,8 @@ class handler(BaseHTTPRequestHandler):
         body = self.rfile.read(length)
         forwarded_for = self.headers.get("x-forwarded-for", "")
         client_ip = forwarded_for.split(",", 1)[0].strip() or self.client_address[0]
-        status, payload = handle_scan_request(body, length, client_ip)
+        user_id = authenticated_user_id(self.headers.get("authorization"))
+        status, payload = handle_scan_request(body, length, client_ip, user_id)
         return self.send_json(status, payload)
 
     def do_GET(self):

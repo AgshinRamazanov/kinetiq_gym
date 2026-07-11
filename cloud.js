@@ -16,9 +16,11 @@ const META_KEY = 'kinetiq-sync-meta';
 const CONFLICT_KEY = 'kinetiq-sync-conflicts';
 const DEVICE_KEY = 'kinetiq-device-id';
 const PENDING_VERIFICATION_KEY = 'kinetiq-pending-verification';
+const TERMS_VERSION = '2026-07-12';
 const resendVerificationButton = document.getElementById('resend-verification');
 const deviceId = localStorage.getItem(DEVICE_KEY) || crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`;
 localStorage.setItem(DEVICE_KEY, deviceId);
+window.getCloudAccessToken = async () => (await supabase?.auth.getSession())?.data?.session?.access_token || null;
 
 function setStatus(message, tone = '') {
   status.textContent = message;
@@ -42,6 +44,19 @@ function showPendingVerification(email) {
 function clearPendingVerification() {
   localStorage.removeItem(PENDING_VERIFICATION_KEY);
   resendVerificationButton.hidden = true;
+}
+async function ensureCurrentTerms(user) {
+  if (!user || user.user_metadata?.terms_version === TERMS_VERSION) return true;
+  const accepted = confirm('KINETIQ updated its Terms, Privacy Policy, and health disclaimer. Accept them to continue cloud synchronization?');
+  if (!accepted) {
+    await supabase.auth.signOut();
+    setStatus('Terms were not accepted. Cloud synchronization is signed out.', 'error');
+    return false;
+  }
+  const { data, error } = await supabase.auth.updateUser({ data: { terms_version: TERMS_VERSION, consented_at: new Date().toISOString() } });
+  if (error) throw error;
+  currentUser = data.user;
+  return true;
 }
 function callbackError() {
   const params = new URLSearchParams(`${location.search.slice(1)}&${location.hash.slice(1)}`);
@@ -175,6 +190,7 @@ function setCloudAccountMode(mode = 'login') {
   createButton.textContent = accountMode === 'signup' ? 'Already have an account? Log in' : 'Create an account';
   setStatus(accountMode === 'signup' ? 'Create a secure account to synchronize your data.' : 'Welcome back.');
   window.setAccountMode?.(accountMode);
+  window.setLegalSignupMode?.(accountMode === 'signup');
 }
 
 async function signOutEverywhere() {
@@ -196,7 +212,7 @@ if (!configured()) {
     window.formSupabase = supabase;
     const { data: { session } } = await supabase.auth.getSession();
     currentUser = session?.user || null;
-    if (currentUser && !sessionStorage.getItem('form-cloud-hydrated')) await hydrateOrMigrate();
+    if (currentUser && await ensureCurrentTerms(currentUser) && !sessionStorage.getItem('form-cloud-hydrated')) await hydrateOrMigrate();
     supabase.auth.onAuthStateChange(async (event, sessionNow) => {
       currentUser = sessionNow?.user || null;
       if (event === 'PASSWORD_RECOVERY') window.Kinetiq.ui.openSheet('password-reset');
@@ -206,7 +222,7 @@ if (!configured()) {
         window.Kinetiq.ui.openSheet('login');
         if (typeof homeToast === 'function') homeToast('Email verified · account ready.');
       }
-      if (currentUser && event === 'SIGNED_IN' && !sessionStorage.getItem('form-cloud-hydrated')) await hydrateOrMigrate();
+      if (currentUser && event === 'SIGNED_IN' && await ensureCurrentTerms(currentUser) && !sessionStorage.getItem('form-cloud-hydrated')) await hydrateOrMigrate();
     });
     window.addEventListener('localDataChanged', event => queueChange(event.detail.key, event.detail.value, event.detail.value === null));
     window.addEventListener('online', flushQueue);
@@ -232,7 +248,7 @@ loginForm.addEventListener('submit', async event => {
   loginButton.disabled = true;
   try {
     const response = accountMode === 'signup'
-      ? await supabase.auth.signUp({ email, password, options: { data: { name }, emailRedirectTo: authRedirectUrl() } })
+      ? await supabase.auth.signUp({ email, password, options: { data: { name, terms_version: TERMS_VERSION, consented_at: new Date().toISOString() }, emailRedirectTo: authRedirectUrl() } })
       : await supabase.auth.signInWithPassword({ email, password });
     if (response.error) throw response.error;
     if (!response.data.session) {

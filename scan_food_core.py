@@ -72,17 +72,18 @@ SCHEMA = {
 }
 
 
-def handle_scan_request(body, content_length, client_ip):
+def handle_scan_request(body, content_length, client_ip, user_id=None):
     key = os.environ.get("GEMINI_API_KEY")
     if not key:
         return 503, {"error": "Scanner is not configured. Set GEMINI_API_KEY on the server."}
 
     try:
-        if not burst_limiter.allow(client_ip):
-            log_event("warning", "scan_rate_limited", client_ip=client_ip, limit="burst")
+        identity = f"user:{user_id}" if user_id else f"ip:{client_ip}"
+        if not burst_limiter.allow(identity):
+            log_event("warning", "scan_rate_limited", identity_type="user" if user_id else "ip", limit="burst")
             return 429, {"error": "Too many scans. Please wait one minute and try again."}
-        if not daily_ip_limiter.allow(client_ip):
-            log_event("warning", "scan_rate_limited", client_ip=client_ip, limit="daily")
+        if not daily_ip_limiter.allow(identity):
+            log_event("warning", "scan_rate_limited", identity_type="user" if user_id else "ip", limit="daily")
             return 429, {"error": "Daily scanning limit reached. Please try again tomorrow."}
         if content_length <= 0 or content_length > MAX_REQUEST:
             return 413, {"error": "Image request must be smaller than 15 MB."}
@@ -97,7 +98,7 @@ def handle_scan_request(body, content_length, client_ip):
             return 503, {"error": "The scanner has reached today's usage budget."}
 
         result = analyze_food_image(key, image, mime)
-        log_event("info", "scan_complete", client_ip=client_ip, confidence=result.get("confidence"))
+        log_event("info", "scan_complete", identity_type="user" if user_id else "ip", confidence=result.get("confidence"))
         return 200, result
     except urllib.error.HTTPError as error:
         detail = "Gemini could not analyze this image."

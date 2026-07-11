@@ -21,6 +21,7 @@
     if (!sheet) return false;
     sheet.classList.add('open');
     sheet.setAttribute('aria-hidden', 'false');
+    sheet.removeAttribute('inert');
     return true;
   }
 
@@ -28,6 +29,7 @@
     if (!sheet) return false;
     sheet.classList.remove('open');
     sheet.setAttribute('aria-hidden', 'true');
+    sheet.setAttribute('inert', '');
     const video = sheet.querySelector('video');
     if (video) video.pause();
     return true;
@@ -43,10 +45,20 @@
     button.addEventListener('click', () => closeSheet(button.closest('.sheet')));
   });
   document.querySelectorAll('.sheet').forEach(sheet => {
+    if (sheet.getAttribute('aria-hidden') === 'true') sheet.setAttribute('inert', '');
     sheet.addEventListener('click', event => {
       if (event.target === sheet) closeSheet(sheet);
     });
   });
+  new MutationObserver(records => records.forEach(record => {
+    for (const node of record.addedNodes) {
+      if (!(node instanceof Element)) continue;
+      const sheets = [node, ...node.querySelectorAll?.('.sheet') || []].filter(item => item.matches?.('.sheet'));
+      sheets.forEach(sheet => {
+        if (sheet.getAttribute('aria-hidden') === 'true') sheet.setAttribute('inert', '');
+      });
+    }
+  })).observe(document.body, { childList: true, subtree: true });
 
   global.Kinetiq = Object.assign(global.Kinetiq || {}, {
     ui: Object.freeze({ navigate, openSheet, closeSheet })

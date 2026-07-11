@@ -30,6 +30,7 @@ def load_local_env(path=".env"):
 load_local_env()
 
 from scan_food_core import DailyQuota, SlidingWindowLimiter, handle_scan_request
+from auth import authenticated_user_id
 
 
 class AppHandler(SimpleHTTPRequestHandler):
@@ -55,11 +56,24 @@ class AppHandler(SimpleHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_POST(self):
+        if self.path == "/api/telemetry":
+            length = int(self.headers.get("Content-Length", "0"))
+            try:
+                payload = json.loads(self.rfile.read(length)) if 0 < length <= 4096 else {}
+                event = payload.get("event")
+                if event not in {"page_view", "feature_open", "client_error"}:
+                    raise ValueError("invalid event")
+                from scan_food_core import log_event
+                log_event("error" if event == "client_error" else "info", event, page=str(payload.get("page", ""))[:80], feature=str(payload.get("feature", ""))[:80])
+                return self.send_json(202, {"accepted": True})
+            except (ValueError, json.JSONDecodeError):
+                return self.send_json(400, {"error": "Invalid event"})
         if self.path != "/api/scan-food":
             return self.send_json(404, {"error": "Not found"})
         length = int(self.headers.get("Content-Length", "0"))
         body = self.rfile.read(length)
-        status, payload = handle_scan_request(body, length, self.client_address[0])
+        user_id = authenticated_user_id(self.headers.get("authorization"))
+        status, payload = handle_scan_request(body, length, self.client_address[0], user_id)
         return self.send_json(status, payload)
 
 
