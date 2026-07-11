@@ -36,6 +36,24 @@ def local_asset_path(reference):
 
 
 class FrontendStaticTests(unittest.TestCase):
+    def test_shared_core_modules_load_before_features(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        storage_position = index.index('src="core/storage.js')
+        ui_position = index.index('src="core/ui.js')
+        home_position = index.index('src="home.js')
+        self.assertLess(storage_position, home_position)
+        self.assertLess(ui_position, home_position)
+
+        storage = (ROOT / "core" / "storage.js").read_text(encoding="utf-8")
+        ui = (ROOT / "core" / "ui.js").read_text(encoding="utf-8")
+        self.assertIn("global.readLocal = readLocal", storage)
+        self.assertIn("global.writeLocal = writeLocal", storage)
+        self.assertIn("global.navigate = navigate", ui)
+
+        service_worker = (ROOT / "sw.js").read_text(encoding="utf-8")
+        self.assertIn("'./core/storage.js'", service_worker)
+        self.assertIn("'./core/ui.js'", service_worker)
+
     def test_index_referenced_local_assets_exist(self):
         parser = AssetParser()
         parser.feed((ROOT / "index.html").read_text(encoding="utf-8"))
@@ -69,7 +87,7 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("./pwa.js", service_worker)
         self.assertIn("./i18n.js", service_worker)
         self.assertIn("request.mode === 'navigate'", service_worker)
-        self.assertIn("kinetiq-shell-v20260709-7", service_worker)
+        self.assertRegex(service_worker, r"kinetiq-shell-v\d{8}-\d+")
 
     def test_language_selector_and_dictionaries_exist(self):
         index = (ROOT / "index.html").read_text(encoding="utf-8")
