@@ -15,6 +15,8 @@ const queue = window.Kinetiq?.syncQueue;
 const META_KEY = 'kinetiq-sync-meta';
 const CONFLICT_KEY = 'kinetiq-sync-conflicts';
 const DEVICE_KEY = 'kinetiq-device-id';
+const PENDING_VERIFICATION_KEY = 'kinetiq-pending-verification';
+const resendVerificationButton = document.getElementById('resend-verification');
 const deviceId = localStorage.getItem(DEVICE_KEY) || crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`;
 localStorage.setItem(DEVICE_KEY, deviceId);
 
@@ -24,6 +26,29 @@ function setStatus(message, tone = '') {
 }
 function configured() {
   return /^https:\/\/.+\.supabase\.co$/.test(config.url || '') && Boolean(config.anonKey);
+}
+function authRedirectUrl() {
+  const configuredRedirect = String(config.redirectUrl || '').trim();
+  return configuredRedirect || new URL(location.pathname, location.origin).href;
+}
+function pendingVerification() {
+  try { return JSON.parse(localStorage.getItem(PENDING_VERIFICATION_KEY)); } catch { return null; }
+}
+function showPendingVerification(email) {
+  resendVerificationButton.hidden = false;
+  document.getElementById('login-email').value = email || '';
+  setStatus(`Account created for ${email}. Open the verification email to activate it, then return here.`, 'online');
+}
+function clearPendingVerification() {
+  localStorage.removeItem(PENDING_VERIFICATION_KEY);
+  resendVerificationButton.hidden = true;
+}
+function callbackError() {
+  const params = new URLSearchParams(`${location.search.slice(1)}&${location.hash.slice(1)}`);
+  const description = params.get('error_description');
+  if (!description) return null;
+  history.replaceState({}, document.title, location.pathname);
+  return description.replaceAll('+', ' ');
 }
 function readMeta() {
   try { return JSON.parse(localStorage.getItem(META_KEY)) || {}; } catch { return {}; }
@@ -175,6 +200,12 @@ if (!configured()) {
     supabase.auth.onAuthStateChange(async (event, sessionNow) => {
       currentUser = sessionNow?.user || null;
       if (event === 'PASSWORD_RECOVERY') window.Kinetiq.ui.openSheet('password-reset');
+      if (event === 'SIGNED_IN' && currentUser?.email_confirmed_at && pendingVerification()) {
+        clearPendingVerification();
+        setStatus('Email verified. Your account is active and syncing.', 'online');
+        window.Kinetiq.ui.openSheet('login');
+        if (typeof homeToast === 'function') homeToast('Email verified · account ready.');
+      }
       if (currentUser && event === 'SIGNED_IN' && !sessionStorage.getItem('form-cloud-hydrated')) await hydrateOrMigrate();
     });
     window.addEventListener('localDataChanged', event => queueChange(event.detail.key, event.detail.value, event.detail.value === null));
@@ -201,11 +232,13 @@ loginForm.addEventListener('submit', async event => {
   loginButton.disabled = true;
   try {
     const response = accountMode === 'signup'
-      ? await supabase.auth.signUp({ email, password, options: { data: { name }, emailRedirectTo: location.origin } })
+      ? await supabase.auth.signUp({ email, password, options: { data: { name }, emailRedirectTo: authRedirectUrl() } })
       : await supabase.auth.signInWithPassword({ email, password });
     if (response.error) throw response.error;
     if (!response.data.session) {
-      setStatus('Check your email and verify the account before logging in.', 'online');
+      localStorage.setItem(PENDING_VERIFICATION_KEY, JSON.stringify({ email, createdAt: Date.now() }));
+      showPendingVerification(email);
+      if (typeof homeToast === 'function') homeToast('Account created · verify your email.');
       return;
     }
     currentUser = response.data.user;
@@ -226,9 +259,28 @@ document.getElementById('forgot-password').addEventListener('click', async () =>
   if (!supabase) return setStatus('Cloud account service is not configured.', 'error');
   const email = document.getElementById('login-email').value.trim();
   if (!email) return setStatus('Enter your email first.', 'error');
-  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: location.origin });
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: authRedirectUrl() });
   setStatus(error ? error.message : 'Password reset link sent. Check your email.', error ? 'error' : 'online');
 });
+
+resendVerificationButton.addEventListener('click', async () => {
+  if (!supabase) return setStatus('Cloud account service is not configured.', 'error');
+  const email = pendingVerification()?.email || document.getElementById('login-email').value.trim();
+  if (!email) return setStatus('Enter your email first.', 'error');
+  resendVerificationButton.disabled = true;
+  const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: authRedirectUrl() } });
+  setStatus(error ? error.message : 'A new verification email was sent.', error ? 'error' : 'online');
+  resendVerificationButton.disabled = false;
+});
+
+const verificationError = callbackError();
+if (verificationError) {
+  setStatus(`Verification failed: ${verificationError}. Request a new email below.`, 'error');
+  resendVerificationButton.hidden = false;
+  window.Kinetiq.ui.openSheet('login');
+} else if (pendingVerification() && !currentUser) {
+  showPendingVerification(pendingVerification().email);
+}
 
 document.getElementById('password-reset-form').addEventListener('submit', async event => {
   event.preventDefault();
