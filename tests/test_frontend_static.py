@@ -53,6 +53,19 @@ class FrontendStaticTests(unittest.TestCase):
         service_worker = (ROOT / "sw.js").read_text(encoding="utf-8")
         self.assertIn("'./core/storage.js'", service_worker)
         self.assertIn("'./core/ui.js'", service_worker)
+        self.assertIn("'./core/sync-queue.js'", service_worker)
+
+    def test_account_recovery_deletion_and_versioned_sync_are_wired(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        cloud = (ROOT / "cloud.js").read_text(encoding="utf-8")
+        schema = (ROOT / "supabase-schema.sql").read_text(encoding="utf-8")
+        self.assertIn('id="forgot-password"', index)
+        self.assertIn('id="password-reset-form"', index)
+        self.assertIn('id="delete-account"', index)
+        self.assertIn("resetPasswordForEmail", cloud)
+        self.assertIn("delete_own_account", cloud)
+        self.assertIn("revision bigint", schema)
+        self.assertIn("function public.delete_own_account", schema)
 
     def test_index_referenced_local_assets_exist(self):
         parser = AssetParser()

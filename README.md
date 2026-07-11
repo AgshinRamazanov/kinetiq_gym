@@ -52,3 +52,16 @@ Run the release smoke checks with:
 ```powershell
 python -m unittest discover -s tests
 ```
+
+## Supabase accounts and synchronization
+
+After pulling a schema change, run `supabase-schema.sql` in Supabase Dashboard >
+SQL Editor before deploying the frontend. The schema enables per-user RLS,
+versioned records, conflict detection, and the protected `delete_own_account`
+function. Never place a service-role key in browser code.
+
+For public signup, email verification, and password recovery, configure a custom
+SMTP provider under Supabase Authentication. The built-in sender is suitable only
+for limited development testing. Add every production and preview URL to Supabase
+Authentication > URL Configuration so verification and recovery links return to
+the correct app.

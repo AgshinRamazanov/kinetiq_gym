@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kinetiq-shell-v20260712-1';
+const CACHE_NAME = 'kinetiq-shell-v20260712-2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -31,6 +31,7 @@ const APP_SHELL = [
   './i18n.js',
   './core/storage.js',
   './core/ui.js',
+  './core/sync-queue.js',
   './app.js',
   './home.js',
   './train.js',

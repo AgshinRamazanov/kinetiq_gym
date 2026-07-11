@@ -21,6 +21,13 @@ its feature file.
 - `Kinetiq.storage.remove(key)` removes data and emits `localDataChanged`.
 - `Kinetiq.ui.navigate(id)` changes the active main screen.
 - `Kinetiq.ui.openSheet(id)` and `closeSheet(element)` manage modal sheets.
+- `Kinetiq.syncQueue` stores pending cloud writes in IndexedDB and retries them
+  after connectivity returns.
+
+Cloud rows use optimistic revisions. A write succeeds only from the revision the
+device last observed. If another device changed the same key first, the remote
+version is retained and the unsent local value is preserved in
+`kinetiq-sync-conflicts` instead of being silently destroyed.
 
 Whenever a new local JavaScript or CSS file is required at startup, add it to
 `APP_SHELL` in `sw.js` and bump `CACHE_NAME`.
