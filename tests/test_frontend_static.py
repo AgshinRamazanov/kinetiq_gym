@@ -36,6 +36,40 @@ def local_asset_path(reference):
 
 
 class FrontendStaticTests(unittest.TestCase):
+    def test_shared_core_modules_load_before_features(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        storage_position = index.index('src="core/storage.js')
+        ui_position = index.index('src="core/ui.js')
+        home_position = index.index('src="home.js')
+        self.assertLess(storage_position, home_position)
+        self.assertLess(ui_position, home_position)
+
+        storage = (ROOT / "core" / "storage.js").read_text(encoding="utf-8")
+        ui = (ROOT / "core" / "ui.js").read_text(encoding="utf-8")
+        self.assertIn("global.readLocal = readLocal", storage)
+        self.assertIn("global.writeLocal = writeLocal", storage)
+        self.assertIn("global.navigate = navigate", ui)
+
+        service_worker = (ROOT / "sw.js").read_text(encoding="utf-8")
+        self.assertIn("'./core/storage.js'", service_worker)
+        self.assertIn("'./core/ui.js'", service_worker)
+        self.assertIn("'./core/sync-queue.js'", service_worker)
+
+    def test_account_recovery_deletion_and_versioned_sync_are_wired(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        cloud = (ROOT / "cloud.js").read_text(encoding="utf-8")
+        schema = (ROOT / "supabase-schema.sql").read_text(encoding="utf-8")
+        self.assertIn('id="forgot-password"', index)
+        self.assertIn('id="password-reset-form"', index)
+        self.assertIn('id="delete-account"', index)
+        self.assertIn('id="resend-verification"', index)
+        self.assertIn("resetPasswordForEmail", cloud)
+        self.assertIn("supabase.auth.resend", cloud)
+        self.assertIn("kinetiq-pending-verification", cloud)
+        self.assertIn("delete_own_account", cloud)
+        self.assertIn("revision bigint", schema)
+        self.assertIn("function public.delete_own_account", schema)
+
     def test_index_referenced_local_assets_exist(self):
         parser = AssetParser()
         parser.feed((ROOT / "index.html").read_text(encoding="utf-8"))
@@ -69,7 +103,7 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("./pwa.js", service_worker)
         self.assertIn("./i18n.js", service_worker)
         self.assertIn("request.mode === 'navigate'", service_worker)
-        self.assertIn("kinetiq-shell-v20260709-7", service_worker)
+        self.assertRegex(service_worker, r"kinetiq-shell-v\d{8}-\d+")
 
     def test_language_selector_and_dictionaries_exist(self):
         index = (ROOT / "index.html").read_text(encoding="utf-8")

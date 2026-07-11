@@ -1,30 +1,3 @@
-const screens = document.querySelectorAll('.screen');
-const navButtons = document.querySelectorAll('[data-nav]');
-const bottomButtons = document.querySelectorAll('.bottom-nav button[data-nav]');
-
-function navigate(id) {
-  const update = () => {
-    screens.forEach(s => s.classList.toggle('active', s.id === id));
-    bottomButtons.forEach(b => b.classList.toggle('active', b.dataset.nav === id));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(update);
-  else update();
-}
-navButtons.forEach(btn => btn.addEventListener('click', () => navigate(btn.dataset.nav)));
-
-document.querySelectorAll('[data-open]').forEach(btn => btn.addEventListener('click', () => {
-  const sheet = document.getElementById(btn.dataset.open);
-  sheet.classList.add('open'); sheet.setAttribute('aria-hidden', 'false');
-}));
-document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => {
-  const sheet = btn.closest('.sheet'); sheet.classList.remove('open'); sheet.setAttribute('aria-hidden', 'true');
-  const video = sheet.querySelector('video'); if(video) video.pause();
-}));
-document.querySelectorAll('.sheet').forEach(sheet => sheet.addEventListener('click', e => {
-  if(e.target === sheet) { sheet.classList.remove('open'); sheet.setAttribute('aria-hidden', 'true'); }
-}));
-
 document.querySelectorAll('.goal-switch button').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('.goal-switch button').forEach(b => b.classList.remove('selected')); btn.classList.add('selected');
   const title = document.querySelector('.week-hero h2');

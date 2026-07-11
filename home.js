@@ -9,8 +9,6 @@ function appDateTimeSnapshot(value = new Date()) {
   const date = value instanceof Date ? value : new Date(value);
   return { dateId: localDateId(date), timestamp: date.getTime(), hour: date.getHours(), minute: date.getMinutes() };
 }
-function readLocal(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
-function writeLocal(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); window.dispatchEvent(new CustomEvent('localDataChanged',{detail:{key,value}})); } catch {} }
 function homeToast(message) { const el = document.getElementById('toast'); el.textContent = message; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1800); }
 function homeT(text) { return window.KinetiqI18n?.t(text) || text; }
 let appDateTime = appDateTimeSnapshot();
