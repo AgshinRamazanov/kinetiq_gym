@@ -10,9 +10,8 @@
     });
   });
 
+  // Taking control must not interrupt a first-time visit with a reload.
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (sessionStorage.getItem('kinetiq-sw-refreshing')) return;
-    sessionStorage.setItem('kinetiq-sw-refreshing', '1');
-    location.reload();
+    window.dispatchEvent(new CustomEvent('kinetiqServiceWorkerReady'));
   });
 })();
