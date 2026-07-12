@@ -67,11 +67,27 @@ test('training choices and cancel flow control session visibility', async ({ pag
   await page.locator('.training-place [data-place="home"]').click();
   await page.locator('.training-split [data-body="full"]').click();
   await page.locator('#generate-workout').click();
-  await expect(page.locator('#session-list .session.generated')).toHaveCount(5);
+  await expect(page.locator('#session-list .session.generated')).toHaveCount(4);
   await expect(page.locator('#cancel-workout-plan')).toBeVisible();
   await page.locator('#cancel-workout-plan').click();
   await expect(page.locator('#session-list .session')).toHaveCount(0);
   await expect(page.locator('.empty-workout')).toBeVisible();
+});
+
+test('exercise count supports presets and clamps custom amount to the selected pool', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.bottom-nav [data-nav="plan"]').click();
+  await page.locator('.training-split [data-body="upper"]').click();
+  await page.locator('.training-count [data-count="3"]').click();
+  await page.locator('#generate-workout').click();
+  await expect(page.locator('#session-list .session.generated')).toHaveCount(3);
+  await page.locator('#cancel-workout-plan').click();
+  await page.locator('.training-count [data-count="custom"]').click();
+  await page.locator('#custom-exercise-count').fill('99');
+  await expect(page.locator('#custom-exercise-count')).toHaveValue('11');
+  await expect(page.locator('#custom-exercise-count')).toHaveAttribute('max', '11');
+  await page.locator('#generate-workout').click();
+  await expect(page.locator('#session-list .session.generated')).toHaveCount(11);
 });
 
 test('push and pull generate different logical exercise pools', async ({ page }) => {

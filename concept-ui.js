@@ -61,10 +61,12 @@
   const planSessions = plan.querySelector('.session-list');
   const planBuilder = plan.querySelector('.workout-builder');
   const trainingSplit = plan.querySelector('.training-split');
+  trainingSplit.insertAdjacentHTML('afterend', `<section class="training-count"><small>HOW MANY EXERCISES?</small><div><button data-count="3">3</button><button class="active" data-count="4">4</button><button data-count="5">5</button><button data-count="custom">Custom</button></div><label hidden>Custom amount<input id="custom-exercise-count" type="number" min="3" value="6" inputmode="numeric"><span id="exercise-count-limit"></span></label></section>`);
+  const trainingCount = plan.querySelector('.training-count');
   const sessionTitle = [...plan.querySelectorAll('.section-title')].find(item => item.querySelector('h2')?.textContent);
   planSessions.insertAdjacentHTML('afterend', `<article class="recovery-session"><i>♧</i><div><small>ACTIVE RECOVERY</small><strong>Mobility and reset</strong><span>30 min · Easy</span></div><b>→</b></article>`);
   const recoverySession = plan.querySelector('.recovery-session');
-  trainingSplit.after(sessionTitle, planSessions, recoverySession, planBuilder);
+  trainingCount.after(sessionTitle, planSessions, recoverySession, planBuilder);
   const sessionImages = [
     'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=320&q=75',
     'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=320&q=75',
@@ -79,6 +81,32 @@
     window.setTrainingBody?.(button.dataset.body);
   }));
   window.setTrainingBody?.('lower');
+  const customCountLabel = trainingCount.querySelector('label');
+  const customCountInput = trainingCount.querySelector('input');
+  const countLimit = trainingCount.querySelector('#exercise-count-limit');
+  window.updateTrainingExerciseLimit = () => {
+    const limit = window.trainingExerciseLimit?.() || 3;
+    customCountInput.max = String(limit);
+    if (Number(customCountInput.value) > limit) customCountInput.value = String(limit);
+    countLimit.textContent = `Maximum ${limit}`;
+    const active = trainingCount.querySelector('button.active');
+    const requested = active?.dataset.count === 'custom' ? customCountInput.value : active?.dataset.count;
+    window.setTrainingExerciseCount?.(requested || Math.min(4, limit));
+  };
+  trainingCount.querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
+    trainingCount.querySelectorAll('button').forEach(item => item.classList.toggle('active', item === button));
+    const custom = button.dataset.count === 'custom';
+    customCountLabel.hidden = !custom;
+    window.updateTrainingExerciseLimit();
+    if (custom) customCountInput.focus();
+  }));
+  customCountInput.addEventListener('input', () => {
+    const limit = window.trainingExerciseLimit?.() || 3;
+    const value = Math.max(3, Math.min(limit, Number(customCountInput.value) || 3));
+    if (Number(customCountInput.value) > limit) customCountInput.value = String(limit);
+    window.setTrainingExerciseCount?.(value);
+  });
+  window.updateTrainingExerciseLimit();
   const trainingPlaceControl = plan.querySelector('.training-place');
   trainingPlaceControl.querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
     trainingPlaceControl.querySelectorAll('button').forEach(item => item.classList.toggle('active', item === button));

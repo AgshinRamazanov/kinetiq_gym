@@ -6,6 +6,7 @@
 let trainingGoal = readLocal('form-training-goal', 'muscle');
 let trainingPlace = 'gym';
 let trainingBody = 'upper';
+let trainingExerciseCount = 4;
 const sessionsPerWeek = 4;
 const totalProgramWeeks = 8;
 
@@ -95,7 +96,16 @@ const exercises = {
   }
 };
 window.setTrainingBody = value => {
-  if (exercises[trainingPlace]?.[value]) trainingBody = value;
+  if (exercises[trainingPlace]?.[value]) {
+    trainingBody = value;
+    window.updateTrainingExerciseLimit?.();
+  }
+};
+window.trainingExerciseLimit = () => exercises[trainingPlace]?.[trainingBody]?.length || 3;
+window.setTrainingExerciseCount = value => {
+  const limit = window.trainingExerciseLimit();
+  trainingExerciseCount = Math.max(3, Math.min(limit, Number(value) || 4));
+  return trainingExerciseCount;
 };
 
 const generatedExerciseImages = [
@@ -221,8 +231,14 @@ function bindSingleChoice(selector, setter) {
     button.classList.add('selected'); setter(button.dataset.value);
   }));
 }
-bindSingleChoice('.location-choice', value => trainingPlace = value);
-bindSingleChoice('.body-choice', value => trainingBody = value);
+bindSingleChoice('.location-choice', value => {
+  trainingPlace = value;
+  window.updateTrainingExerciseLimit?.();
+});
+bindSingleChoice('.body-choice', value => {
+  trainingBody = value;
+  window.updateTrainingExerciseLimit?.();
+});
 
 function bindSessionVideoButtons(scope = document) {
   scope.querySelectorAll('#session-list [data-exercise-name]').forEach((button, index) => {
@@ -274,10 +290,23 @@ document.getElementById('exercise-video')?.addEventListener('touchstart', () => 
 document.querySelector('.video-stage')?.addEventListener('pointerdown', () => document.activeElement?.blur?.());
 bindSessionVideoButtons();
 
+function exercisesForSession(list) {
+  const sessionSize = Math.min(trainingExerciseCount, list.length);
+  if (list.length <= sessionSize) return list;
+  const anchors = list.slice(0, 2);
+  const rotationPool = list.slice(2);
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const seed = [...`${todayKey}-${trainingPlace}-${trainingBody}`]
+    .reduce((total, character) => total + character.charCodeAt(0), 0);
+  const offset = seed % rotationPool.length;
+  const rotated = rotationPool.slice(offset).concat(rotationPool.slice(0, offset));
+  return anchors.concat(rotated.slice(0, sessionSize - anchors.length));
+}
+
 document.getElementById('generate-workout').addEventListener('click', () => {
   markTodayWorkoutGenerated();
   setTrainPlanReadyState();
-  const list = exercises[trainingPlace][trainingBody];
+  const list = exercisesForSession(exercises[trainingPlace][trainingBody]);
   const placeLabel = trainingPlace === 'gym' ? 'GYM' : 'HOME';
   const bodyLabel = ({ upper: 'Upper body', push: 'Push', pull: 'Pull', lower: 'Lower body', full: 'Full body', core: 'Core' })[trainingBody] || 'Workout';
   document.querySelector('#plan .section-title span').textContent = `${placeLabel} · ${bodyLabel.toUpperCase()}`;

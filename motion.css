@@ -5,11 +5,11 @@ html{scroll-behavior:smooth}
 ::view-transition-new(root){animation:motionIn .38s var(--ease-out) both}
 @keyframes motionOut{to{opacity:0;transform:scale(.985)}}
 @keyframes motionIn{from{opacity:0;transform:translateY(10px) scale(.99)}}
-.screen.active>.topbar,.screen.active>.page-header{animation:slideDown .45s var(--ease-out) both}
-.screen.active>.hero-copy,.screen.active>.goal-switch,.screen.active>.fuel-mode{animation:rise .5s .05s var(--ease-out) both}
-.screen.active>.scan-card,.screen.active>.week-hero,.screen.active>.nutrition-summary,.screen.active>.body-card{animation:rise .55s .1s var(--ease-out) both}
-.screen.active>.section-title,.screen.active>.macro-heading,.screen.active>.macro-bars,.screen.active>.measure-button{animation:rise .5s .16s var(--ease-out) both}
-.screen.active>.rhythm-grid,.screen.active>.workout-card,.screen.active>.workout-builder,.screen.active>.chart-card,.screen.active>.stats-row,.screen.active>.plan-accuracy{animation:rise .55s .22s var(--ease-out) both}
+.screen.active>.topbar,.screen.active>.page-header{animation:slideDown .3s var(--ease-out) both}
+.screen.active>.hero-copy,.screen.active>.goal-switch,.screen.active>.fuel-mode{animation:rise .32s .03s var(--ease-out) both}
+.screen.active>.scan-card,.screen.active>.week-hero,.screen.active>.nutrition-summary,.screen.active>.body-card{animation:rise .34s .05s var(--ease-out) both}
+.screen.active>.section-title,.screen.active>.macro-heading,.screen.active>.macro-bars,.screen.active>.measure-button{animation:rise .32s .07s var(--ease-out) both}
+.screen.active>.rhythm-grid,.screen.active>.workout-card,.screen.active>.workout-builder,.screen.active>.chart-card,.screen.active>.stats-row,.screen.active>.plan-accuracy{animation:rise .34s .09s var(--ease-out) both}
 @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
 button,.meal,.session,.notification,.history-row{transition:transform .2s var(--ease-out),box-shadow .25s ease,background-color .25s ease,border-color .25s ease,opacity .25s ease}
@@ -26,19 +26,17 @@ button:active{transform:scale(.965)}
 .week-number{animation:dropBadge .7s .24s var(--ease-spring) both}
 @keyframes dropBadge{from{transform:translateY(-55px)}to{transform:none}}
 .workout-photo video{transition:transform 5s ease}.workout-card:hover .workout-photo video{transform:scale(1.18)}
-.scan-glow{animation:breathe 2.8s ease-in-out infinite}
+.scan-glow{animation:breathe 3.2s ease-in-out infinite}
 @keyframes breathe{50%{transform:scale(1.2);opacity:.65}}
-.streak-card .flame{animation:float 2.3s ease-in-out infinite}
+.streak-card .flame{animation:float 3s ease-in-out infinite}
 @keyframes float{50%{transform:translateY(-5px) rotate(3deg)}}
 .session-list .session,.meal-list .meal,.notification-list .notification,.checkin-history .history-row,.logged-meals .logged-meal{animation:listIn .45s var(--ease-out) both}
 .session-list>*:nth-child(2),.meal-list>*:nth-child(2),.notification-list>*:nth-child(2),.checkin-history>*:nth-child(2),.logged-meals>*:nth-child(2){animation-delay:.06s}
 .session-list>*:nth-child(3),.meal-list>*:nth-child(3),.notification-list>*:nth-child(3),.checkin-history>*:nth-child(3),.logged-meals>*:nth-child(3){animation-delay:.12s}
 .session-list>*:nth-child(4),.meal-list>*:nth-child(4),.checkin-history>*:nth-child(4),.logged-meals>*:nth-child(4){animation-delay:.18s}
 @keyframes listIn{from{opacity:0;transform:translateX(15px)}to{opacity:1;transform:none}}
-.sheet{transition:opacity .28s ease,backdrop-filter .28s ease;backdrop-filter:blur(0)}.sheet.open{backdrop-filter:blur(4px)}
-.sheet-content{transition:transform .48s var(--ease-out);transform:translateY(105%)}.sheet.open .sheet-content{transform:none}
-.sheet.open .sheet-content>*:not(.close){animation:sheetItem .45s .12s var(--ease-out) both}
-@keyframes sheetItem{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.sheet{transition:opacity .22s ease}
+.sheet-content{transition:transform .34s var(--ease-out);transform:translate3d(0,105%,0)}.sheet.open .sheet-content{transform:translate3d(0,0,0)}
 .calculated.show{animation:resultPop .5s var(--ease-spring)}
 @keyframes resultPop{from{opacity:0;transform:scale(.88) translateY(10px)}to{opacity:1;transform:none}}
 #progress-line{stroke-dasharray:500;stroke-dashoffset:500;animation:drawLine 1.2s .25s var(--ease-out) forwards}
@@ -54,3 +52,8 @@ button:active{transform:scale(.965)}
 .video-stage video{animation:videoFade .5s ease}@keyframes videoFade{from{opacity:.25}to{opacity:1}}
 @media(hover:hover){button:hover{transform:translateY(-1px)}.meal:hover,.session:hover{box-shadow:0 8px 24px #1717140d;transform:translateY(-2px)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}::view-transition-old(root),::view-transition-new(root){animation:none!important}}
+
+/* Keep navigation and media compositing cheap on mobile devices. */
+.screen{animation:none}
+.workout-photo video{filter:none}
+.bottom-nav{background:#fffdf8fa;backdrop-filter:none}
