@@ -53,6 +53,19 @@ Run the release smoke checks with:
 python -m unittest discover -s tests
 ```
 
+Run browser, mobile viewport, and WCAG accessibility checks with:
+
+```powershell
+npm install
+npx playwright install
+npm run test:e2e
+```
+
+For authenticated scanner limits, set `SUPABASE_URL` and `SUPABASE_ANON_KEY` on
+the server as well as in the browser configuration. Anonymous scans retain the
+stricter IP fallback. Client telemetry records only event names and pages; it
+respects Do Not Track and never sends form values, health entries, or food photos.
+
 ## Supabase accounts and synchronization
 
 After pulling a schema change, run `supabase-schema.sql` in Supabase Dashboard >

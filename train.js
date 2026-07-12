@@ -78,18 +78,33 @@ function renderTrainingProgress() {
 
 const exercises = {
   gym: {
-    upper: ['Barbell Bench Press', 'Dumbbell Palm Rotational Bent Over Row', 'Seated Dumbbell Shoulder Press', 'Pull-Up / Chin-Up'],
-    lower: ['Barbell Back Squat', 'Dumbbell Deadlift', 'Lever Horizontal Leg Press', 'Treadmill Running'],
-    full: ['Barbell Back Squat', 'Barbell Bench Press', 'Dumbbell Palm Rotational Bent Over Row', 'Dumbbell Deadlift'],
+    upper: ['Barbell Bench Press', 'Dumbbell Palm Rotational Bent Over Row', 'Seated Dumbbell Shoulder Press', 'Pull-Up / Chin-Up', 'Dumbbell Lateral Raise', 'Cable Pulldown', 'Dumbbell Incline Bench Press', 'Barbell Curl', 'Seated Cable Row (Wide-Grip)', 'Dumbbell Arnold Press', 'Cable Standing Fly'],
+    push: ['Barbell Bench Press', 'Seated Dumbbell Shoulder Press', 'Close-Grip Push-Up', 'Bench Dips', 'Dumbbell Lateral Raise', 'Chest Dips', 'Dumbbell Incline Bench Press', 'Cable Standing Fly', 'Dumbbell Arnold Press', 'Barbell Close Grip Bench Press', 'Pec Deck Fly'],
+    pull: ['Pull-Up / Chin-Up', 'Dumbbell Palm Rotational Bent Over Row', 'Dumbbell Deadlift', 'Hanging Straight Leg Raise', 'Cable Pulldown', 'Seated Cable Row (V-Grip)', 'Barbell Underhand Bent-Over Row', 'Wide Grip Cable Lat Pulldown', 'Cable Straight Arm Pulldown', 'Lever High Row', 'Barbell Curl'],
+    lower: ['Barbell Back Squat', 'Dumbbell Deadlift', 'Lever Horizontal Leg Press', 'Treadmill Running', 'Dumbbell Lunge', 'Lever Leg Extension', 'Dumbbell Goblet Squat', 'Dumbbell Stiff Leg Deadlift', 'Lever Seated Leg Curl', 'Dumbbell Standing Calf Raise', 'Sled Hack Squat'],
+    full: ['Barbell Back Squat', 'Barbell Bench Press', 'Dumbbell Palm Rotational Bent Over Row', 'Dumbbell Deadlift', 'Dumbbell Lunge', 'Cable Pulldown', 'Barbell Clean And Press', 'Dumbbell Goblet Squat', 'Dumbbell Incline Bench Press', 'Lever High Row', 'Dumbbell Standing Calf Raise'],
     core: ['Cable Kneeling Crunch', 'Hanging Straight Leg Raise', 'Lever Seated Crunch', 'Vertical Leg Raise', 'Bicycle Twisting Crunch']
   },
   home: {
-    upper: ['Push-Up', 'Close-Grip Push-Up', 'Incline Push-Up', 'Bench Dips'],
-    lower: ['Squat', 'Jump Step-Up', 'Donkey Calf Raise', 'Burpee'],
-    full: ['Burpee', 'Squat', 'Push-Up', 'Jumping Jack', 'V-Up'],
+    upper: ['Push-Up', 'Close-Grip Push-Up', 'Incline Push-Up', 'Bench Dips', 'Deep Push-Up', 'Inverted Row Between Chairs', 'Bench Pull-Up', 'Close Grip Chin-Up', 'Triceps Dips', 'Scapula Dips', 'Commando Pull-Up'],
+    push: ['Push-Up', 'Close-Grip Push-Up', 'Incline Push-Up', 'Bench Dips', 'Deep Push-Up', 'Chest Dips', 'Triceps Dips', 'Old School Reverse Extensions', 'Standing Wheel Rollout', 'Scapula Dips', 'Dynamic Chest Stretch'],
+    pull: ['Pull-Up / Chin-Up', 'Dumbbell Palm Rotational Bent Over Row', 'Superman', 'Reverse Snow Angel', 'Inverted Row Between Chairs', 'Pull-Up (Wide Grip)', 'Bench Pull-Up', 'Close Grip Chin-Up', 'Commando Pull-Up', 'Reverse Grip Pull-Up', 'Shoulder-Width Pull-Up'],
+    lower: ['Squat', 'Jump Step-Up', 'Donkey Calf Raise', 'Burpee', 'Rear Decline Bridge', 'Running', 'Plyometric Side Lunge Stretch', 'Standing Knee Raise Stretch', 'Stairs Calf Stretch', 'Hip Circles Stretch', "Runner's Stretch"],
+    full: ['Burpee', 'Squat', 'Push-Up', 'Jumping Jack', 'V-Up', 'Inverted Row Between Chairs', 'Rear Decline Bridge', 'Running', 'Bench Pull-Up', 'Triceps Dips', 'Plyometric Side Lunge Stretch', 'Hanging Leg Hip Raise', 'Cardio Exercise'],
     core: ['Side Plank', 'Lying Leg Raise', 'Sit-Up', 'V-Up', 'Twisting Crunch']
   }
 };
+window.setTrainingBody = value => {
+  if (exercises[trainingPlace]?.[value]) trainingBody = value;
+};
+
+const generatedExerciseImages = [
+  'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=360&q=80',
+  'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=360&q=80',
+  'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=360&q=80',
+  'https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=360&q=80',
+  'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=360&q=80'
+];
 
 // Only pairs whose source page explicitly identifies the demonstrated movement.
 // Everything else is intentionally withheld instead of showing misleading footage.
@@ -141,7 +156,52 @@ Object.assign(verifiedExerciseVideos, {
   'Lying Leg Raise':[exerciseDbVideo('lying-floor-leg-raise.mp4')],
   'Sit-Up':[exerciseDbVideo('sit-ups.mp4')],
   'V-Up':[exerciseDbVideo('v-up.mp4')],
-  'Twisting Crunch':[exerciseDbVideo('twisting-crunch.mp4')]
+  'Twisting Crunch':[exerciseDbVideo('twisting-crunch.mp4')],
+  'Dumbbell Lateral Raise':[exerciseDbVideo('dumbbell-lateral-raise.mp4')],
+  'Cable Pulldown':[exerciseDbVideo('cable-pulldown.mp4')],
+  'Chest Dips':[exerciseDbVideo('chest-dips.mp4')],
+  'Seated Cable Row (V-Grip)':[exerciseDbVideo('cable-straight-back-seated-row-v-grip.mp4')],
+  'Dumbbell Lunge':[exerciseDbVideo('dumbbell-lunge.mp4')],
+  'Lever Leg Extension':[exerciseDbVideo('lever-leg-extension.mp4')],
+  'Deep Push-Up':[exerciseDbVideo('deep-push-ups.mp4')],
+  'Inverted Row Between Chairs':[exerciseDbVideo('inverted-row-between-chairs.mp4')],
+  'Pull-Up (Wide Grip)':[exerciseDbVideo('pull-up-wide-front-grip.mp4')],
+  'Rear Decline Bridge':[exerciseDbVideo('rear-decline-bridge.mp4')],
+  'Running':[exerciseDbVideo('running.mp4')],
+  'Dumbbell Incline Bench Press':[exerciseDbVideo('dumbbell-incline-bench-press.mp4')],
+  'Barbell Curl':[exerciseDbVideo('barbell-curl.mp4')],
+  'Seated Cable Row (Wide-Grip)':[exerciseDbVideo('cable-seated-row-wide-grip.mp4')],
+  'Dumbbell Arnold Press':[exerciseDbVideo('dumbbell-arnold-press.mp4')],
+  'Cable Standing Fly':[exerciseDbVideo('cable-standing-fly-crossover-fly.mp4')],
+  'Barbell Close Grip Bench Press':[exerciseDbVideo('barbell-close-grip-bench-press.mp4')],
+  'Pec Deck Fly':[exerciseDbVideo('lever-pec-deck-fly.mp4')],
+  'Barbell Underhand Bent-Over Row':[exerciseDbVideo('barbell-underhand-bent-over-row.mp4')],
+  'Wide Grip Cable Lat Pulldown':[exerciseDbVideo('cable-bar-lateral-pulldown-wide-shoulder-grip.mp4')],
+  'Cable Straight Arm Pulldown':[exerciseDbVideo('cable-straight-arm-pulldown.mp4')],
+  'Lever High Row':[exerciseDbVideo('lever-high-row.mp4')],
+  'Dumbbell Goblet Squat':[exerciseDbVideo('dumbbell-goblet-squat.mp4')],
+  'Dumbbell Stiff Leg Deadlift':[exerciseDbVideo('dumbbell-stiff-leg-deadlift.mp4')],
+  'Lever Seated Leg Curl':[exerciseDbVideo('lever-seated-leg-curl.mp4')],
+  'Dumbbell Standing Calf Raise':[exerciseDbVideo('dumbbell-standing-calf-raise.mp4')],
+  'Sled Hack Squat':[exerciseDbVideo('sled-hack-squat.mp4')],
+  'Barbell Clean And Press':[exerciseDbVideo('barbell-clean-and-press.mp4')],
+  'Bench Pull-Up':[exerciseDbVideo('bench-pull-ups.mp4')],
+  'Close Grip Chin-Up':[exerciseDbVideo('close-grip-chin-up.mp4')],
+  'Triceps Dips':[exerciseDbVideo('triceps-dips.mp4')],
+  'Scapula Dips':[exerciseDbVideo('scapula-dips.mp4')],
+  'Commando Pull-Up':[exerciseDbVideo('commando-pull-up.mp4')],
+  'Old School Reverse Extensions':[exerciseDbVideo('old-school-reverse-extensions.mp4')],
+  'Standing Wheel Rollout':[exerciseDbVideo('stretching-standing-wheel-rollout.mp4')],
+  'Dynamic Chest Stretch':[exerciseDbVideo('stretching-dynamic-chest-stretch.mp4')],
+  'Reverse Grip Pull-Up':[exerciseDbVideo('reverse-grip-pull-up.mp4')],
+  'Shoulder-Width Pull-Up':[exerciseDbVideo('pull-up-shoulder-grip.mp4')],
+  'Plyometric Side Lunge Stretch':[exerciseDbVideo('stretching-plyo-side-lunge-stretch.mp4')],
+  'Standing Knee Raise Stretch':[exerciseDbVideo('stretching-knee-raise.mp4')],
+  'Stairs Calf Stretch':[exerciseDbVideo('stretching-stairs-calf-stretch.mp4')],
+  'Hip Circles Stretch':[exerciseDbVideo('stretching-hip-circles-stretch.mp4')],
+  "Runner's Stretch":[exerciseDbVideo('stretching-runners-stretch.mp4')],
+  'Hanging Leg Hip Raise':[exerciseDbVideo('hanging-leg-hip-raise.mp4')],
+  'Cardio Exercise':[exerciseDbVideo('cardio-exercises.mp4')]
 });
 
 function setGoal(goal) {
@@ -219,15 +279,14 @@ document.getElementById('generate-workout').addEventListener('click', () => {
   setTrainPlanReadyState();
   const list = exercises[trainingPlace][trainingBody];
   const placeLabel = trainingPlace === 'gym' ? 'GYM' : 'HOME';
-  const bodyLabel = document.querySelector('.body-choice .selected').textContent;
+  const bodyLabel = ({ upper: 'Upper body', push: 'Push', pull: 'Pull', lower: 'Lower body', full: 'Full body', core: 'Core' })[trainingBody] || 'Workout';
   document.querySelector('#plan .section-title span').textContent = `${placeLabel} · ${bodyLabel.toUpperCase()}`;
   document.querySelector('#plan .section-title h2').textContent = 'Today’s generated session';
   const container = document.getElementById('session-list'); container.innerHTML = '';
   list.forEach((name, index) => {
     const button = document.createElement('button'); button.className = 'session generated';
     button.dataset.exerciseName = name;
-    button.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span><div><small>${placeLabel} · ${programCopy[trainingGoal].label.toUpperCase()}</small><h3>${name}</h3><p>${trainingGoal === 'lose' ? '3' : '4'} sets · form video included</p></div><b>▶</b>`;
-    const playIcon = button.querySelector('b'); playIcon.textContent = ''; playIcon.className = 'session-play'; playIcon.setAttribute('aria-hidden','true');
+    button.innerHTML = `<i class="session-thumb" style="background-image:url('${generatedExerciseImages[index % generatedExerciseImages.length]}')"><span>${String(index + 1).padStart(2, '0')}</span></i><div><small>${placeLabel} · ${programCopy[trainingGoal].label.toUpperCase()}</small><h3>${name}</h3><p>${trainingGoal === 'lose' ? '3' : '4'} sets · ${trainingGoal === 'lose' ? '45' : '75'}s rest</p></div><b aria-hidden="true">›</b>`;
     const completedToday = readLocal('form-exercise-completions',[]).some(item => item.exercise === name && isToday(item.date));
     if (completedToday) { button.classList.add('done'); button.querySelector('small').textContent = 'COMPLETED TODAY'; button.querySelector('b').textContent = '✓'; }
     button.addEventListener('click', () => { if (requireTodayWorkoutGenerated()) openExercise(button.dataset.exerciseName, index, list.length); }); container.appendChild(button);

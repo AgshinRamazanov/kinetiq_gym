@@ -105,7 +105,10 @@ document.getElementById('analyze-food').addEventListener('click', async () => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 35000);
   try {
-    const response = await fetch('/api/scan-food',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(selectedFoodImage), signal:controller.signal });
+    const token = await window.getCloudAccessToken?.();
+    const headers = {'Content-Type':'application/json'};
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const response = await fetch('/api/scan-food',{ method:'POST', headers, body:JSON.stringify(selectedFoodImage), signal:controller.signal });
     const data = await response.json(); if (!response.ok) { const problem = new Error(data.error || 'Food analysis failed.'); problem.status = response.status; throw problem; }
     scannedFood = data;
     document.getElementById('scan-food-name').textContent = data.name;

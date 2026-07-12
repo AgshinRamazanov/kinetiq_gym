@@ -8,6 +8,10 @@
     {
       "source": "/api/exercise-video",
       "destination": "/api/exercise_video"
+    },
+    {
+      "source": "/api/telemetry",
+      "destination": "/api/telemetry"
     }
   ],
   "functions": {
@@ -18,7 +22,8 @@
     "api/exercise_video.py": {
       "maxDuration": 60,
       "excludeFiles": "{tests/**,__pycache__/**,**/*.pyc,.git/**,.agents/**,.codex/**}"
-    }
+    },
+    "api/telemetry.py": { "maxDuration": 10 }
   },
   "headers": [
     {

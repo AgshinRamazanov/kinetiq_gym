@@ -1,4 +1,11 @@
+let progressRangeDays = 7;
 function readCheckins() { return readLocal('form-body-checkins', []).filter(item=>Number.isFinite(new Date(item.date).getTime())).sort((a,b)=>new Date(a.date)-new Date(b.date)); }
+function rangedCheckins() {
+  const history = readCheckins();
+  if (!Number.isFinite(progressRangeDays)) return history;
+  const cutoff = Date.now() - progressRangeDays * 86400000;
+  return history.filter(item => new Date(item.date).getTime() >= cutoff);
+}
 function signedChange(value, unit) {
   if (Math.abs(value) < .05) return `No change`;
   return `${value > 0 ? '↑' : '↓'} ${Math.abs(value).toFixed(1)}${unit}`;
@@ -7,7 +14,7 @@ function shortDate(timestamp) { return new Date(timestamp).toLocaleDateString(un
 function bmiCategory(bmi) { return bmi < 18.5 ? 'Below range' : bmi < 25 ? 'Healthy range' : bmi < 30 ? 'Above range' : 'High range'; }
 
 function renderProgress() {
-  const history = readCheckins().slice(-8);
+  const history = rangedCheckins().slice(-24);
   const list = document.getElementById('checkin-history');
   if (!history.length) {
     document.getElementById('progress-bodyfat').textContent = '—';
@@ -46,6 +53,10 @@ function renderProgress() {
 
   list.innerHTML = history.slice().reverse().map(item => `<article class="history-row"><span>${shortDate(item.date)}</span><div><small>BODY FAT</small><strong>${item.bodyFat.toFixed(1)}%</strong></div><div><small>WEIGHT</small><strong>${item.weight.toFixed(1)} kg</strong></div><div><small>LEAN</small><strong>${item.leanMass.toFixed(1)} kg</strong></div><div><small>BMI</small><strong>${(item.bmi || item.weight/((item.height/100)**2)).toFixed(1)}</strong></div></article>`).join('');
 }
+window.setProgressRange = days => {
+  progressRangeDays = days === 'all' ? Infinity : Number(days) || 7;
+  renderProgress();
+};
 
 function updateBmiPreview() {
   const height = Number(document.getElementById('height').value);

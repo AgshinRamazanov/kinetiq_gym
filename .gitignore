@@ -4,3 +4,5 @@ __pycache__/
 supabase-config.js
 .git-publish/
 api/__pycache__/
+node_modules/
+test-results/
