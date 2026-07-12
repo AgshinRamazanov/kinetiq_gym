@@ -99,6 +99,10 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn('class="session-thumb"', train)
         self.assertIn("push: ['Barbell Bench Press'", train)
         self.assertIn("pull: ['Pull-Up / Chin-Up'", train)
+        substitutions = (ROOT / "substitutions.js").read_text(encoding="utf-8")
+        self.assertIn("const substitutionCatalog", substitutions)
+        self.assertIn("exerciseGroup", substitutions)
+        self.assertIn("Start from any exercise", substitutions)
         for name in ("lower.png", "upper.png", "push.png", "pull.png", "full-body.png"):
             self.assertTrue((ROOT / "assets" / "training-split" / name).exists())
         self.assertTrue((ROOT / "assets" / "training-split" / "muscle-groups.png").exists())

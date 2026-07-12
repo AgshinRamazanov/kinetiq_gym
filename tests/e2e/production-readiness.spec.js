@@ -102,6 +102,28 @@ test('new dashboard, train, progress, and legal content translate', async ({ pag
   await expect(page.locator('#privacy h2')).toHaveText('Политика конфиденциальности');
 });
 
+test('exercise substitutions translate, stay in the same group, and return to the plan', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.bottom-nav [data-nav="plan"]').click();
+  await page.locator('.training-split [data-body="push"]').click();
+  await page.locator('#generate-workout').click();
+  await page.locator('#session-list [data-exercise-name="Barbell Bench Press"]').click();
+  await page.locator('#substitute-exercise').click();
+  await page.locator('.substitution-reasons [data-reason="dislike"]').click();
+  await expect(page.locator('#substitution-results')).toContainText('Push-Up');
+  await expect(page.locator('#substitution-results')).not.toContainText('Pull-Up / Chin-Up');
+  await page.locator('#substitution-results .substitution-option').first().click();
+  await expect(page.locator('#exercise-substitution')).toHaveAttribute('aria-hidden', 'true');
+  await expect(page.locator('#workout')).toHaveAttribute('aria-hidden', 'true');
+  await expect(page.locator('#session-list')).toContainText('SUBSTITUTED');
+  await page.evaluate(() => window.KinetiqI18n.setLanguage('tr'));
+  await page.locator('#session-list [data-exercise-name]').first().click();
+  await expect(page.locator('#substitute-exercise')).toContainText('Egzersizi değiştir');
+  await page.locator('#substitute-exercise').click();
+  await expect(page.locator('#exercise-substitution')).toContainText('AKILLI DEĞİŞİM');
+  await expect(page.locator('#exercise-substitution')).toContainText('Ekipman yok');
+});
+
 test('progress range tabs filter check-in history', async ({ page }) => {
   await page.addInitScript(() => {
     const day = 86400000;
