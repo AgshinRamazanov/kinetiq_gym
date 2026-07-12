@@ -82,6 +82,30 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("headers.Authorization", scanner)
         self.assertIn('f"user:{user_id}"', core)
 
+    def test_editorial_concept_ui_is_wired(self):
+        index = (ROOT / "index.html").read_text(encoding="utf-8")
+        service_worker = (ROOT / "sw.js").read_text(encoding="utf-8")
+        concept = (ROOT / "concept-ui.js").read_text(encoding="utf-8")
+        self.assertIn('concept-ui.css', index)
+        self.assertIn('concept-ui.js', index)
+        self.assertIn("./concept-ui.css", service_worker)
+        self.assertIn("form-wellness-log", concept)
+        self.assertIn("form-progress-photos", concept)
+        dynamic_i18n = (ROOT / "dynamic-i18n.js").read_text(encoding="utf-8")
+        self.assertIn("registerTranslations", dynamic_i18n)
+        self.assertIn("Privacy Policy", dynamic_i18n)
+        self.assertIn("Workout Plan", dynamic_i18n)
+        train = (ROOT / "train.js").read_text(encoding="utf-8")
+        self.assertIn('class="session-thumb"', train)
+        self.assertIn("push: ['Barbell Bench Press'", train)
+        self.assertIn("pull: ['Pull-Up / Chin-Up'", train)
+        for name in ("lower.png", "upper.png", "push.png", "pull.png", "full-body.png"):
+            self.assertTrue((ROOT / "assets" / "training-split" / name).exists())
+        self.assertTrue((ROOT / "assets" / "training-split" / "muscle-groups.png").exists())
+        for name in ("lower.png", "upper.png", "push.png", "pull.png", "full.png"):
+            self.assertTrue((ROOT / "assets" / "training-split" / "transparent" / name).exists())
+        self.assertIn("split-cutout", concept)
+
     def test_index_referenced_local_assets_exist(self):
         parser = AssetParser()
         parser.feed((ROOT / "index.html").read_text(encoding="utf-8"))

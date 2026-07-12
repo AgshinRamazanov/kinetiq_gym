@@ -79,17 +79,32 @@ function renderTrainingProgress() {
 const exercises = {
   gym: {
     upper: ['Barbell Bench Press', 'Dumbbell Palm Rotational Bent Over Row', 'Seated Dumbbell Shoulder Press', 'Pull-Up / Chin-Up'],
+    push: ['Barbell Bench Press', 'Seated Dumbbell Shoulder Press', 'Close-Grip Push-Up', 'Bench Dips'],
+    pull: ['Pull-Up / Chin-Up', 'Dumbbell Palm Rotational Bent Over Row', 'Dumbbell Deadlift', 'Hanging Straight Leg Raise'],
     lower: ['Barbell Back Squat', 'Dumbbell Deadlift', 'Lever Horizontal Leg Press', 'Treadmill Running'],
     full: ['Barbell Back Squat', 'Barbell Bench Press', 'Dumbbell Palm Rotational Bent Over Row', 'Dumbbell Deadlift'],
     core: ['Cable Kneeling Crunch', 'Hanging Straight Leg Raise', 'Lever Seated Crunch', 'Vertical Leg Raise', 'Bicycle Twisting Crunch']
   },
   home: {
     upper: ['Push-Up', 'Close-Grip Push-Up', 'Incline Push-Up', 'Bench Dips'],
+    push: ['Push-Up', 'Close-Grip Push-Up', 'Incline Push-Up', 'Bench Dips'],
+    pull: ['Pull-Up / Chin-Up', 'Dumbbell Palm Rotational Bent Over Row', 'Superman', 'Reverse Snow Angel'],
     lower: ['Squat', 'Jump Step-Up', 'Donkey Calf Raise', 'Burpee'],
     full: ['Burpee', 'Squat', 'Push-Up', 'Jumping Jack', 'V-Up'],
     core: ['Side Plank', 'Lying Leg Raise', 'Sit-Up', 'V-Up', 'Twisting Crunch']
   }
 };
+window.setTrainingBody = value => {
+  if (exercises[trainingPlace]?.[value]) trainingBody = value;
+};
+
+const generatedExerciseImages = [
+  'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=360&q=80',
+  'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=360&q=80',
+  'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=360&q=80',
+  'https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=360&q=80',
+  'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=360&q=80'
+];
 
 // Only pairs whose source page explicitly identifies the demonstrated movement.
 // Everything else is intentionally withheld instead of showing misleading footage.
@@ -219,15 +234,14 @@ document.getElementById('generate-workout').addEventListener('click', () => {
   setTrainPlanReadyState();
   const list = exercises[trainingPlace][trainingBody];
   const placeLabel = trainingPlace === 'gym' ? 'GYM' : 'HOME';
-  const bodyLabel = document.querySelector('.body-choice .selected').textContent;
+  const bodyLabel = ({ upper: 'Upper body', push: 'Push', pull: 'Pull', lower: 'Lower body', full: 'Full body', core: 'Core' })[trainingBody] || 'Workout';
   document.querySelector('#plan .section-title span').textContent = `${placeLabel} · ${bodyLabel.toUpperCase()}`;
   document.querySelector('#plan .section-title h2').textContent = 'Today’s generated session';
   const container = document.getElementById('session-list'); container.innerHTML = '';
   list.forEach((name, index) => {
     const button = document.createElement('button'); button.className = 'session generated';
     button.dataset.exerciseName = name;
-    button.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span><div><small>${placeLabel} · ${programCopy[trainingGoal].label.toUpperCase()}</small><h3>${name}</h3><p>${trainingGoal === 'lose' ? '3' : '4'} sets · form video included</p></div><b>▶</b>`;
-    const playIcon = button.querySelector('b'); playIcon.textContent = ''; playIcon.className = 'session-play'; playIcon.setAttribute('aria-hidden','true');
+    button.innerHTML = `<i class="session-thumb" style="background-image:url('${generatedExerciseImages[index % generatedExerciseImages.length]}')"><span>${String(index + 1).padStart(2, '0')}</span></i><div><small>${placeLabel} · ${programCopy[trainingGoal].label.toUpperCase()}</small><h3>${name}</h3><p>${trainingGoal === 'lose' ? '3' : '4'} sets · ${trainingGoal === 'lose' ? '45' : '75'}s rest</p></div><b aria-hidden="true">›</b>`;
     const completedToday = readLocal('form-exercise-completions',[]).some(item => item.exercise === name && isToday(item.date));
     if (completedToday) { button.classList.add('done'); button.querySelector('small').textContent = 'COMPLETED TODAY'; button.querySelector('b').textContent = '✓'; }
     button.addEventListener('click', () => { if (requireTodayWorkoutGenerated()) openExercise(button.dataset.exerciseName, index, list.length); }); container.appendChild(button);

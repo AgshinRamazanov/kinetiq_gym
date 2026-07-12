@@ -621,8 +621,20 @@
     observer.observe(document.body, { childList: true, characterData: true, subtree: true });
   }
 
+  function registerTranslations(additions) {
+    Object.entries(additions || {}).forEach(([lang, entries]) => {
+      if (!dictionary[lang]) dictionary[lang] = {};
+      Object.assign(dictionary[lang], entries || {});
+      Object.entries(entries || {}).forEach(([english, translated]) => {
+        canonicalText.set(normalize(english), english);
+        canonicalText.set(normalize(translated), english);
+      });
+    });
+    if (document.body) applyLanguage();
+  }
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  window.KinetiqI18n = { applyLanguage, currentLanguage, setLanguage, t: translateText };
+  window.KinetiqI18n = { applyLanguage, currentLanguage, setLanguage, t: translateText, registerTranslations };
 })();
