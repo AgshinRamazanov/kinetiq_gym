@@ -5,6 +5,13 @@ insightsSection.innerHTML = '<div class="section-title"><div><span data-insight-
 insightsAnchor.before(insightsSection);
 
 const insightText = {
+  en: {
+    thisWeek: 'THIS WEEK', heading: 'What the data says', estimatedGoalDate: 'ESTIMATED GOAL DATE', weightTrend: 'WEIGHT TREND', waistChange: 'WAIST CHANGE', strength: 'STRENGTH', consistency: 'CONSISTENCY', avgCalories: 'AVG. CALORIES',
+    notEnoughData: 'Not enough data', stable: 'Stable', collectingData: 'Building a baseline', twoCheckinsNeeded: 'Add at least three check-ins across 14 days for a responsible estimate.',
+    aboutBodyFat: target => `about ${target}% body fat`, aboutKg: target => `about ${target} kg`, aboutLeanMass: target => `about ${target} kg lean mass`, goalRangeReached: 'Goal range reached', currentWithinTarget: label => `Your current estimate is already within the program target: ${label}.`,
+    noDateYet: 'No date yet', trendNotMoving: 'The recent trend is not moving toward the program target yet.', overTwoYears: 'More than 2 years', rateTooSlow: 'The current pace is too slow for a useful short-term estimate.', projectionToward: label => `Projection toward ${label}, based on measured pace and not a guarantee.`,
+    addAnotherCheckin: 'Add another check-in at least one week apart.', comparedCheckin: 'Compared with the latest check-in from at least six days ago.', waistNeeded: 'Waist measurements from two check-ins are needed.', waistMeasured: 'Measured change; normal daily fluctuations apply.', buildingBaseline: 'Building baseline', logSetsTwoWeeks: 'Log sets across two weeks to compare performance.', strengthEstimate: 'Estimated from your strongest logged sets versus last week.', consistencyNote: percent => `${percent}% of your planned weekly training frequency.`, noMealsLogged: 'No meals logged', logMealsAverage: 'Log meals to unlock a seven-day average.', averageAcross: days => `Average across ${days} logged day${days === 1 ? '' : 's'} this week.`
+  },
   ru: {
     thisWeek: '\u042D\u0422\u0410 \u041D\u0415\u0414\u0415\u041B\u042F',
     heading: '\u0427\u0442\u043E \u0433\u043E\u0432\u043E\u0440\u044F\u0442 \u0434\u0430\u043D\u043D\u044B\u0435',
@@ -17,7 +24,7 @@ const insightText = {
     notEnoughData: '\u041C\u0430\u043B\u043E \u0434\u0430\u043D\u043D\u044B\u0445',
     stable: '\u0421\u0442\u0430\u0431\u0438\u043B\u044C\u043D\u043E',
     collectingData: '\u0421\u0431\u043E\u0440 \u0434\u0430\u043D\u043D\u044B\u0445',
-    twoCheckinsNeeded: '\u0414\u043B\u044F \u0430\u043A\u043A\u0443\u0440\u0430\u0442\u043D\u043E\u0439 \u043E\u0446\u0435\u043D\u043A\u0438 \u043D\u0443\u0436\u043D\u044B \u0434\u0432\u0430 \u0438\u043B\u0438 \u0431\u043E\u043B\u044C\u0448\u0435 \u0447\u0435\u043A-\u0438\u043D\u043E\u0432.',
+    twoCheckinsNeeded: '\u0414\u043B\u044F \u043D\u0430\u0434\u0435\u0436\u043D\u043E\u0439 \u043E\u0446\u0435\u043D\u043A\u0438 \u043D\u0443\u0436\u043D\u044B \u043C\u0438\u043D\u0438\u043C\u0443\u043C \u0442\u0440\u0438 \u0447\u0435\u043A-\u0438\u043D\u0430 \u0437\u0430 14 \u0434\u043D\u0435\u0439.',
     aboutBodyFat: target => `\u043E\u043A\u043E\u043B\u043E ${target}% \u0436\u0438\u0440\u0430`,
     aboutKg: target => `\u043E\u043A\u043E\u043B\u043E ${target} \u043A\u0433`,
     aboutLeanMass: target => `\u043E\u043A\u043E\u043B\u043E ${target} \u043A\u0433 \u0441\u0443\u0445\u043E\u0439 \u043C\u0430\u0441\u0441\u044B`,
@@ -52,7 +59,7 @@ const insightText = {
     notEnoughData: 'Yeterli veri yok',
     stable: 'Stabil',
     collectingData: 'Veri toplaniyor',
-    twoCheckinsNeeded: 'Sorumlu bir tahmin icin iki veya daha fazla kontrol gerekir.',
+    twoCheckinsNeeded: 'Guvenilir bir tahmin icin en az uc kontrol ve 14 gunluk veri gerekir.',
     aboutBodyFat: target => `yaklasik ${target}% yag orani`,
     aboutKg: target => `yaklasik ${target} kg`,
     aboutLeanMass: target => `yaklasik ${target} kg yagsiz kutle`,
@@ -107,7 +114,8 @@ function weeklyIntakes() {
   return values;
 }
 function estimateGoal(checkins, goal) {
-  if (checkins.length < 2) return { value: insightT('collectingData'), note: insightT('twoCheckinsNeeded') };
+  const spanDays = checkins.length > 1 ? (checkins.at(-1).date - checkins[0].date) / 86400000 : 0;
+  if (checkins.length < 3 || spanDays < 14) return { value: insightT('collectingData'), note: insightT('twoCheckinsNeeded') };
   const first = checkins[0], last = checkins[checkins.length - 1], days = Math.max(1, (last.date - first.date) / 86400000);
   let remaining, rate, label;
   if (goal === 'lose') {
@@ -132,7 +140,7 @@ function estimateGoal(checkins, goal) {
   if (goalDays > 730) return { value: insightT('overTwoYears'), note: insightT('rateTooSlow') };
   const date = new Date();
   date.setDate(date.getDate() + goalDays);
-  return { value: date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }), note: insightT('projectionToward', label) };
+  return { value: date.toLocaleDateString(insightLang(), { month: 'short', day: 'numeric', year: 'numeric' }), note: insightT('projectionToward', label) };
 }
 function renderInsights() {
   applyInsightLanguage();

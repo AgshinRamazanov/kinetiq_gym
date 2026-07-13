@@ -29,6 +29,17 @@ function setStatus(message, tone = '') {
 function configured() {
   return /^https:\/\/.+\.supabase\.co$/.test(config.url || '') && Boolean(config.anonKey);
 }
+function loadSupabaseClient() {
+  if (window.supabase?.createClient) return Promise.resolve(window.supabase.createClient);
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+    script.async = true;
+    script.onload = () => window.supabase?.createClient ? resolve(window.supabase.createClient) : reject(new Error('Supabase SDK unavailable'));
+    script.onerror = () => reject(new Error('Supabase SDK failed to load'));
+    document.head.appendChild(script);
+  });
+}
 function authRedirectUrl() {
   const configuredRedirect = String(config.redirectUrl || '').trim();
   return configuredRedirect || new URL(location.pathname, location.origin).href;
@@ -207,7 +218,7 @@ if (!configured()) {
   setStatus('Cloud setup is ready · add your Supabase project details.');
 } else {
   try {
-    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+    const createClient = await loadSupabaseClient();
     supabase = createClient(config.url, config.anonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
     window.formSupabase = supabase;
     const { data: { session } } = await supabase.auth.getSession();

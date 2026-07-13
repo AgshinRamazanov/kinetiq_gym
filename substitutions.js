@@ -43,13 +43,24 @@ swapSheet.innerHTML = `<div class="sheet-content substitution-content"><button c
 document.querySelector('.phone-shell').appendChild(swapSheet);
 
 function alternativesForCurrentExercise() {
-  const bodyGroup = ['push', 'pull', 'lower', 'core'].includes(substitutionExercise?.body) ? substitutionExercise.body : null;
-  const group = exerciseGroup[substitutionExercise?.name] || bodyGroup || 'conditioning';
-  return { group, catalog: substitutionCatalog[group] || substitutionCatalog.conditioning };
+  const body = ['upper', 'push', 'pull', 'lower', 'full', 'core'].includes(substitutionExercise?.body)
+    ? substitutionExercise.body
+    : null;
+  const group = exerciseGroup[substitutionExercise?.name] || 'conditioning';
+  const planCatalog = body && window.getTrainingExercisePool
+    ? { home: window.getTrainingExercisePool('home', body), gym: window.getTrainingExercisePool('gym', body) }
+    : null;
+  return { group, catalog: planCatalog || substitutionCatalog[group] || substitutionCatalog.conditioning };
 }
 
 function uniqueAlternatives(items) {
-  return [...new Set(items)].filter(name => name !== substitutionExercise.name).slice(0, 5);
+  const sessionExercises = new Set(
+    [...document.querySelectorAll('#session-list [data-exercise-name]')]
+      .map(row => row.dataset.exerciseName)
+  );
+  return [...new Set(items)]
+    .filter(name => name !== substitutionExercise.name && !sessionExercises.has(name))
+    .slice(0, 5);
 }
 
 function alternativePlace(name, catalog) {
@@ -66,6 +77,11 @@ function renderSubstitutions(reason) {
   else if (reason === 'injury') choices = injuryChoices[injury]?.[group] || [];
   else if (reason === 'different') choices = catalog[substitutionExercise.place === 'gym' ? 'home' : 'gym'];
   else choices = [...catalog.home, ...catalog.gym];
+  const allowedInPlan = new Set([...catalog.home, ...catalog.gym]);
+  choices = choices.filter(name => allowedInPlan.has(name));
+  if (!choices.length && (reason === 'beginner' || reason === 'injury')) {
+    choices = [...catalog.home, ...catalog.gym];
+  }
   const results = document.getElementById('substitution-results');
   results.innerHTML = '';
   const alternatives = uniqueAlternatives(choices);

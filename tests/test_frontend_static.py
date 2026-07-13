@@ -106,7 +106,7 @@ class FrontendStaticTests(unittest.TestCase):
         for name in ("lower.png", "upper.png", "push.png", "pull.png", "full-body.png"):
             self.assertTrue((ROOT / "assets" / "training-split" / name).exists())
         self.assertTrue((ROOT / "assets" / "training-split" / "muscle-groups.png").exists())
-        for name in ("lower.png", "upper.png", "push.png", "pull.png", "full.png"):
+        for name in ("lower.png", "upper.png", "push.png", "pull.png", "full.png", "core.png"):
             self.assertTrue((ROOT / "assets" / "training-split" / "transparent" / name).exists())
         self.assertIn("split-cutout", concept)
 
@@ -124,8 +124,8 @@ class FrontendStaticTests(unittest.TestCase):
         parser = AssetParser()
         parser.feed((ROOT / "index.html").read_text(encoding="utf-8"))
         self.assertEqual("manifest.webmanifest", parser.manifest)
-        self.assertIn("pwa.js?v=20260713-6", parser.assets)
-        self.assertIn("i18n.js?v=20260709-5", parser.assets)
+        self.assertIn("pwa.js?v=20260714-1", parser.assets)
+        self.assertIn("i18n.js?v=20260714-1", parser.assets)
         self.assertIn("styles.css?v=20260709-7", parser.assets)
         self.assertIn("train.css?v=20260709-6", parser.assets)
 
@@ -149,7 +149,7 @@ class FrontendStaticTests(unittest.TestCase):
     def test_language_selector_and_dictionaries_exist(self):
         index = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn("data-language-select", index)
-        self.assertLess(index.index("i18n.js?v=20260709-5"), index.index("app.js"))
+        self.assertLess(index.index("i18n.js?v=20260714-1"), index.index("app.js"))
 
         i18n = (ROOT / "i18n.js").read_text(encoding="utf-8")
         self.assertIn("ru:", i18n)
@@ -161,7 +161,7 @@ class FrontendStaticTests(unittest.TestCase):
         index = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn('data-exercise-name="Barbell Bench Press"', index)
         self.assertNotIn('class="session today" data-open="workout"', index)
-        self.assertIn("train.js?v=20260710-2", index)
+        self.assertIn("train.js?v=20260714-1", index)
 
         train = (ROOT / "train.js").read_text(encoding="utf-8")
         self.assertIn("function bindSessionVideoButtons", train)

@@ -17,7 +17,7 @@ function todayWorkoutGenerated() {
   return Boolean(readLocal(todayWorkoutKey(), null));
 }
 function markTodayWorkoutGenerated() {
-  writeLocal(todayWorkoutKey(), { generatedAt: Date.now(), place: trainingPlace, body: trainingBody, goal: trainingGoal });
+  writeLocal(todayWorkoutKey(), { generatedAt: Date.now(), place: trainingPlace, body: trainingBody, goal: trainingGoal, exerciseCount: trainingExerciseCount });
 }
 function pulseGenerateWorkout() {
   const button = document.getElementById('generate-workout');
@@ -58,7 +58,7 @@ function currentProgramPosition() {
 }
 function renderTrainingProgress() {
   const progress = currentProgramPosition();
-  const position = `WEEK ${progress.week} · DAY ${progress.day}`;
+  const position = `${homeT('WEEK')} ${progress.week} · ${homeT('DAY')} ${progress.day}`;
   const homePosition = document.getElementById('home-program-position');
   if (homePosition) homePosition.textContent = position;
   const weekNumber = document.getElementById('program-week-number');
@@ -102,6 +102,7 @@ window.setTrainingBody = value => {
   }
 };
 window.trainingExerciseLimit = () => exercises[trainingPlace]?.[trainingBody]?.length || 3;
+window.getTrainingExercisePool = (place, body) => [...(exercises[place]?.[body] || [])];
 window.setTrainingExerciseCount = value => {
   const limit = window.trainingExerciseLimit();
   trainingExerciseCount = Math.max(3, Math.min(limit, Number(value) || 4));
@@ -256,7 +257,7 @@ function openExercise(name, index, total, options = {}) {
   if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
   const exercisePlace = options.place || trainingPlace;
   const home = exercisePlace === 'home';
-  document.getElementById('exercise-position').textContent = `EXERCISE ${index + 1} OF ${total}`;
+  document.getElementById('exercise-position').textContent = `${homeT('EXERCISE')} ${index + 1} ${homeT('OF')} ${total}`;
   document.getElementById('exercise-title').innerHTML = name.replace(' ', '<br>');
   document.getElementById('exercise-cue').textContent = home
     ? 'Move with control and stop the set when your form begins to change. Use a stable surface and clear the space around you.'
@@ -344,8 +345,8 @@ window.addEventListener('localDataChanged', event => {
 
 function renderTrainProfile() {
   const profile = readLocal('form-profile', null);
-  const name = profile?.name || 'Guest profile';
-  const email = profile?.email || 'Log in from the Today tab';
+  const name = profile?.name || homeT('Guest profile');
+  const email = profile?.email || homeT('Log in from the Today tab');
   const initials = profile ? profile.name.split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase() : 'GU';
   document.getElementById('profile-name').textContent = name;
   document.getElementById('profile-email').textContent = email;
@@ -354,10 +355,11 @@ function renderTrainProfile() {
     avatar.textContent = profile ? initials : 'SK';
     avatar.classList.toggle('logged-in', Boolean(profile));
   });
-  const logout = document.getElementById('logout-button'); logout.textContent = profile ? 'Log out' : 'Go to login';
+  const logout = document.getElementById('logout-button'); logout.textContent = profile ? homeT('Log out') : homeT('Go to login');
   renderTrainingProgress();
 }
 renderTrainProfile();
+window.addEventListener('languageChanged', renderTrainProfile);
 document.querySelector('[data-open="train-profile"]')?.addEventListener('click', renderTrainProfile);
 document.getElementById('logout-button').addEventListener('click', () => {
   const profile = readLocal('form-profile', null);
