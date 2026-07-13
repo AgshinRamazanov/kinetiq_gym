@@ -37,12 +37,12 @@ function renderTrackedIntake() {
     ['protein','carbs','fat'].forEach(key => {
       const label = document.getElementById(`nutrition-${key}`);
       const bar = document.getElementById(`nutrition-${key}-bar`);
-      if (label) label.textContent = `${targets[key]}g goal · ${intake[key]}g eaten`;
+      if (label) label.textContent = `${targets[key]}g ${homeT('goal')} · ${intake[key]}g ${homeT('eaten')}`;
       if (bar) { const pct = Math.round(intake[key]/targets[key]*100); bar.style.width = `${Math.min(100,pct)}%`; bar.classList.toggle('daily-over',pct > 100); }
     });
   }
   const logged = document.getElementById('logged-meals');
-  if (logged) logged.innerHTML = intake.meals.length ? intake.meals.slice().reverse().map(meal => `<article class="logged-meal"><div><small>${new Date(meal.addedAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} · ${meal.source === 'plan' ? 'MEAL PLAN' : 'SCANNED'}</small><strong>${meal.name}</strong><p>P ${meal.protein}g · C ${meal.carbs}g · F ${meal.fat}g</p></div><div class="logged-actions"><b>${meal.calories} kcal</b><button data-remove-meal="${meal.logId || meal.addedAt}" aria-label="Remove ${meal.name}">Remove</button></div></article>`).join('') : '<p>No meals logged yet.</p>';
+  if (logged) logged.innerHTML = intake.meals.length ? intake.meals.slice().reverse().map(meal => `<article class="logged-meal"><div><small>${new Date(meal.addedAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} · ${homeT(meal.source === 'plan' ? 'MEAL PLAN' : meal.source === 'scan' ? 'SCANNED' : meal.source === 'repeat' ? 'REPEATED' : 'MANUAL')}</small><strong>${meal.name}</strong><p>P ${meal.protein}g · C ${meal.carbs}g · F ${meal.fat}g</p></div><div class="logged-actions"><b>${meal.calories} kcal</b><button data-remove-meal="${meal.logId || meal.addedAt}" aria-label="${homeT('Remove')} ${meal.name}">${homeT('Remove')}</button></div></article>`).join('') : `<p>${homeT('No meals logged yet.')}</p>`;
   document.querySelectorAll('#fuel-meal-list .meal').forEach(button => {
     const added = intake.meals.some(meal => meal.plannedId && meal.plannedId === button.dataset.plannedId);
     button.classList.toggle('added',added); button.querySelector('.meal-number').textContent = added ? '✓' : '+';
@@ -144,6 +144,7 @@ document.getElementById('logged-meals').addEventListener('click', event => {
   if (button) removeIntakeMeal(button.dataset.removeMeal);
 });
 window.addEventListener('goalsUpdated',renderTrackedIntake);
+window.addEventListener('languageChanged',renderTrackedIntake);
 window.addEventListener('fuelRendered',renderTrackedIntake);
 window.addEventListener('appDateChanged',renderTrackedIntake);
 window.addEventListener('focus',renderTrackedIntake);

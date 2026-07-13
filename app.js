@@ -1,3 +1,25 @@
+// Resilient bootstrap: keep the app usable if a stale offline cache misses a
+// core module during an update. The dedicated core modules remain primary.
+if (typeof window.readLocal !== 'function') {
+  window.readLocal = (key, fallback) => { try { const raw = localStorage.getItem(key); return raw === null ? fallback : JSON.parse(raw); } catch { return fallback; } };
+  window.writeLocal = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); window.dispatchEvent(new CustomEvent('localDataChanged', { detail: { key, value } })); return true; } catch { return false; } };
+  window.Kinetiq = Object.assign(window.Kinetiq || {}, { storage: Object.freeze({ read: window.readLocal, write: window.writeLocal, remove(key) { try { localStorage.removeItem(key); window.dispatchEvent(new CustomEvent('localDataChanged', { detail: { key, value: null } })); return true; } catch { return false; } } }) });
+}
+if (!window.Kinetiq?.ui) {
+  const navigateFallback = id => {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.toggle('active', screen.id === id));
+    document.querySelectorAll('.bottom-nav button[data-nav]').forEach(button => button.classList.toggle('active', button.dataset.nav === id));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const openSheetFallback = id => { const sheet = document.getElementById(id); if (!sheet) return false; sheet.classList.add('open'); sheet.setAttribute('aria-hidden', 'false'); sheet.removeAttribute('inert'); return true; };
+  const closeSheetFallback = sheet => { if (!sheet) return false; sheet.classList.remove('open'); sheet.setAttribute('aria-hidden', 'true'); sheet.setAttribute('inert', ''); return true; };
+  window.Kinetiq = Object.assign(window.Kinetiq || {}, { ui: Object.freeze({ navigate: navigateFallback, openSheet: openSheetFallback, closeSheet: closeSheetFallback }) });
+  window.navigate = navigateFallback;
+  document.querySelectorAll('[data-nav]').forEach(button => button.addEventListener('click', () => navigateFallback(button.dataset.nav)));
+  document.querySelectorAll('[data-open]').forEach(button => button.addEventListener('click', () => openSheetFallback(button.dataset.open)));
+  document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => closeSheetFallback(button.closest('.sheet'))));
+}
+
 document.querySelectorAll('.goal-switch button').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('.goal-switch button').forEach(b => b.classList.remove('selected')); btn.classList.add('selected');
   const title = document.querySelector('.week-hero h2');

@@ -9,11 +9,10 @@
       bottomButtons.forEach(button => button.classList.toggle('active', button.dataset.nav === id));
       global.scrollTo({ top: 0, behavior: 'smooth' });
     };
-    if (document.startViewTransition && !global.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      document.startViewTransition(update);
-    } else {
-      update();
-    }
+    // Screen changes must never depend on the experimental View Transitions API.
+    // The existing screen animation still provides motion without risking a
+    // transition callback being skipped in backgrounded or embedded browsers.
+    update();
   }
 
   function openSheet(id) {

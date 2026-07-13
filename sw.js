@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kinetiq-shell-v20260713-12';
+const CACHE_NAME = 'kinetiq-shell-v20260714-8';
 const APP_SHELL = [
   './',
   './index.html',
@@ -15,6 +15,7 @@ const APP_SHELL = [
   './assets/training-split/transparent/push.png',
   './assets/training-split/transparent/pull.png',
   './assets/training-split/transparent/full.png',
+  './assets/training-split/transparent/core.png',
   './styles.css',
   './bodyfat.css',
   './home.css',
@@ -57,6 +58,7 @@ const APP_SHELL = [
   './telemetry.js',
   './concept-ui.js',
   './dynamic-i18n.js',
+  './retention-i18n.js',
   './workout-tracker.js',
   './insights.js',
   './reminders.js',
@@ -87,8 +89,9 @@ self.addEventListener('fetch', event => {
 
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
+      fetch(url.href, { cache: 'no-store', credentials: 'same-origin' })
         .then(response => {
+          if (!response.ok) throw new Error(`Navigation request failed: ${response.status}`);
           const copy = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
           return response;
@@ -102,15 +105,14 @@ self.addEventListener('fetch', event => {
 
   if (/\.(js|css)$/.test(url.pathname)) {
     event.respondWith(
-      fetch(request)
+      fetch(url.href, { cache: 'no-store', credentials: 'same-origin' })
         .then(response => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-          }
+          if (!response.ok) throw new Error(`Asset request failed: ${response.status}`);
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
           return response;
         })
-        .catch(() => caches.match(request))
+        .catch(() => caches.match(request, { ignoreSearch: true }))
     );
     return;
   }

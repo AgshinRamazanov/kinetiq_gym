@@ -10,7 +10,7 @@ function signedChange(value, unit) {
   if (Math.abs(value) < .05) return `No change`;
   return `${value > 0 ? '↑' : '↓'} ${Math.abs(value).toFixed(1)}${unit}`;
 }
-function shortDate(timestamp) { return new Date(timestamp).toLocaleDateString(undefined,{month:'short',day:'numeric'}).toUpperCase(); }
+function shortDate(timestamp) { const lang = window.KinetiqI18n?.currentLanguage?.() || document.documentElement.lang || 'en'; return new Date(timestamp).toLocaleDateString(lang,{month:'short',day:'numeric'}).toLocaleUpperCase(lang); }
 function bmiCategory(bmi) { return bmi < 18.5 ? 'Below range' : bmi < 25 ? 'Healthy range' : bmi < 30 ? 'Above range' : 'High range'; }
 
 function renderProgress() {
@@ -111,3 +111,4 @@ document.querySelector('[data-open="bodyfat"]').addEventListener('click', () => 
 });
 updateBmiPreview();
 renderProgress();
+window.addEventListener('languageChanged', renderProgress);
