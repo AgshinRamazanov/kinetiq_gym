@@ -18,6 +18,9 @@ const DEVICE_KEY = 'kinetiq-device-id';
 const PENDING_VERIFICATION_KEY = 'kinetiq-pending-verification';
 const TERMS_VERSION = '2026-07-12';
 const resendVerificationButton = document.getElementById('resend-verification');
+const verificationResult = document.getElementById('verification-result');
+const verificationResultCard = verificationResult.querySelector('.verification-card');
+const verificationResultAction = document.getElementById('verification-result-action');
 const deviceId = localStorage.getItem(DEVICE_KEY) || crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`;
 localStorage.setItem(DEVICE_KEY, deviceId);
 window.getCloudAccessToken = async () => (await supabase?.auth.getSession())?.data?.session?.access_token || null;
@@ -40,9 +43,43 @@ function loadSupabaseClient() {
     document.head.appendChild(script);
   });
 }
-function authRedirectUrl() {
+function authRedirectUrl(flow = '') {
   const configuredRedirect = String(config.redirectUrl || '').trim();
-  return configuredRedirect || new URL(location.pathname, location.origin).href;
+  const redirect = new URL(configuredRedirect || location.pathname, location.origin);
+  if (flow) redirect.searchParams.set('auth', flow);
+  return redirect.href;
+}
+function authFlowFromUrl() {
+  const params = new URLSearchParams(`${location.search.slice(1)}&${location.hash.slice(1)}`);
+  return params.get('auth') || params.get('type') || '';
+}
+const initialAuthFlow = authFlowFromUrl();
+function showVerificationResult(success, message = '') {
+  verificationResultCard.classList.toggle('error', !success);
+  document.getElementById('verification-result-icon').textContent = success ? '✓' : '!';
+  document.getElementById('verification-result-eyebrow').textContent = success ? 'EMAIL VERIFIED' : 'VERIFICATION FAILED';
+  document.getElementById('verification-result-title').innerHTML = success ? 'Your account<br><em>is ready.</em>' : 'We could not<br><em>verify your email.</em>';
+  document.getElementById('verification-result-message').textContent = message || (success
+    ? 'Your email has been verified successfully. You are now signed in and your progress can sync securely.'
+    : 'This verification link may have expired or already been used. Request a new email and try again.');
+  verificationResultAction.textContent = success ? 'Continue to KINETIQ' : 'Back to sign in';
+  verificationResultAction.dataset.success = String(success);
+  window.Kinetiq.ui.openSheet('verification-result');
+}
+function storeCurrentProfile(user) {
+  if (!user) return;
+  let existing = {};
+  try { existing = JSON.parse(localStorage.getItem('form-profile')) || {}; } catch { /* use account data */ }
+  const email = user.email || existing.email || '';
+  const profile = {
+    ...existing,
+    name: user.user_metadata?.name || existing.name || email.split('@')[0] || 'User',
+    email,
+    emailVerified: Boolean(user.email_confirmed_at)
+  };
+  localStorage.setItem('form-profile', JSON.stringify(profile));
+  if (typeof renderProfile === 'function') renderProfile(profile);
+  if (typeof renderTrainProfile === 'function') renderTrainProfile();
 }
 function pendingVerification() {
   try { return JSON.parse(localStorage.getItem(PENDING_VERIFICATION_KEY)); } catch { return null; }
@@ -76,6 +113,14 @@ function callbackError() {
   history.replaceState({}, document.title, location.pathname);
   return description.replaceAll('+', ' ');
 }
+
+verificationResultAction.addEventListener('click', () => {
+  window.Kinetiq.ui.closeSheet(verificationResult);
+  if (verificationResultAction.dataset.success !== 'true') {
+    resendVerificationButton.hidden = false;
+    window.Kinetiq.ui.openSheet('login');
+  }
+});
 function readMeta() {
   try { return JSON.parse(localStorage.getItem(META_KEY)) || {}; } catch { return {}; }
 }
@@ -223,14 +268,21 @@ if (!configured()) {
     window.formSupabase = supabase;
     const { data: { session } } = await supabase.auth.getSession();
     currentUser = session?.user || null;
+    if (currentUser?.email_confirmed_at) storeCurrentProfile(currentUser);
     if (currentUser && await ensureCurrentTerms(currentUser) && !sessionStorage.getItem('form-cloud-hydrated')) await hydrateOrMigrate();
+    if ((initialAuthFlow === 'verification' || initialAuthFlow === 'signup') && currentUser?.email_confirmed_at) {
+      clearPendingVerification();
+      showVerificationResult(true);
+      history.replaceState({}, document.title, location.pathname);
+    }
     supabase.auth.onAuthStateChange(async (event, sessionNow) => {
       currentUser = sessionNow?.user || null;
       if (event === 'PASSWORD_RECOVERY') window.Kinetiq.ui.openSheet('password-reset');
       if (event === 'SIGNED_IN' && currentUser?.email_confirmed_at && pendingVerification()) {
         clearPendingVerification();
+        storeCurrentProfile(currentUser);
         setStatus('Email verified. Your account is active and syncing.', 'online');
-        window.Kinetiq.ui.openSheet('login');
+        showVerificationResult(true);
         if (typeof homeToast === 'function') homeToast('Email verified · account ready.');
       }
       if (currentUser && event === 'SIGNED_IN' && await ensureCurrentTerms(currentUser) && !sessionStorage.getItem('form-cloud-hydrated')) await hydrateOrMigrate();
@@ -259,7 +311,7 @@ loginForm.addEventListener('submit', async event => {
   loginButton.disabled = true;
   try {
     const response = accountMode === 'signup'
-      ? await supabase.auth.signUp({ email, password, options: { data: { name, terms_version: TERMS_VERSION, consented_at: new Date().toISOString() }, emailRedirectTo: authRedirectUrl() } })
+      ? await supabase.auth.signUp({ email, password, options: { data: { name, terms_version: TERMS_VERSION, consented_at: new Date().toISOString() }, emailRedirectTo: authRedirectUrl('verification') } })
       : await supabase.auth.signInWithPassword({ email, password });
     if (response.error) throw response.error;
     if (!response.data.session) {
@@ -286,7 +338,7 @@ document.getElementById('forgot-password').addEventListener('click', async () =>
   if (!supabase) return setStatus('Cloud account service is not configured.', 'error');
   const email = document.getElementById('login-email').value.trim();
   if (!email) return setStatus('Enter your email first.', 'error');
-  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: authRedirectUrl() });
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: authRedirectUrl('recovery') });
   setStatus(error ? error.message : 'Password reset link sent. Check your email.', error ? 'error' : 'online');
 });
 
@@ -295,7 +347,7 @@ resendVerificationButton.addEventListener('click', async () => {
   const email = pendingVerification()?.email || document.getElementById('login-email').value.trim();
   if (!email) return setStatus('Enter your email first.', 'error');
   resendVerificationButton.disabled = true;
-  const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: authRedirectUrl() } });
+  const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: authRedirectUrl('verification') } });
   setStatus(error ? error.message : 'A new verification email was sent.', error ? 'error' : 'online');
   resendVerificationButton.disabled = false;
 });
@@ -304,7 +356,7 @@ const verificationError = callbackError();
 if (verificationError) {
   setStatus(`Verification failed: ${verificationError}. Request a new email below.`, 'error');
   resendVerificationButton.hidden = false;
-  window.Kinetiq.ui.openSheet('login');
+  showVerificationResult(false, `Verification failed: ${verificationError}. Request a new email and try again.`);
 } else if (pendingVerification() && !currentUser) {
   showPendingVerification(pendingVerification().email);
 }
